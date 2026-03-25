@@ -1,0 +1,76 @@
+= Lab Details
+:toc:
+:toc-placement: preamble
+:icons: font
+
+== Timing
+
+=== Lab 1: OpenShift Concepts (18 minutes total)
+
+* *Wow Moment*: 3 minutes -- explore the pre-deployed application
+* *Explore*: 5 minutes -- inspect Pods, Services, and Routes
+* *Build It Yourself*: 10 minutes -- recreate the app from scratch using the CLI
+
+== Your lab environment
+
+=== Namespaces
+
+Two namespaces have been provisioned for you:
+
+* `{user}-lab-hello-world` -- Contains a pre-deployed Hello World application used in the Wow Moment and Explore sections
+* `{user}-lab` -- Your clean workspace for the Build It Yourself section
+
+=== Access details
+
+* *OpenShift Console*: {openshift_console_url}
+* *Username*: `{user}`
+* *Password*: `{password}`
+* *Terminal*: Use the *Terminal* tab in this lab interface -- the `oc` CLI is pre-installed
+
+== Verify your CLI access
+
+All commands in this lab use the `oc` CLI. Run the following in your terminal to confirm you're logged in:
+
+[source,bash]
+----
+oc login {openshift_api_url} --username {user} --password {password}
+----
+
+Verify your identity:
+
+[source,bash]
+----
+oc whoami
+----
+
+Expected output:
+----
+{user}
+----
+
+== Application details
+
+The Hello World application used in this lab:
+
+* *Image*: `quay.io/openshiftlabs/hello-openshift:1.0.0`
+* *Port*: 8080
+* *Behavior*: Simple HTTP server that responds with "Hello OpenShift!"
+
+== Troubleshooting
+
+*Can't log in?*
+→ Make sure you copied the credentials exactly. The API URL is `{openshift_api_url}`.
+
+*Pod not starting?*
+→ Run `oc describe pod <pod-name> -n <namespace>` to see events and error details.
+
+*Route URL not loading?*
+→ Allow 30-60 seconds after route creation. Routes become active asynchronously.
+
+*Wrong namespace?*
+→ Run `oc project` to check your current namespace. Use `oc project <namespace>` to switch.
+
+== Authors
+
+*Maintainer*: Shachar Borenstein (sborenst@redhat.com) +
+*Last Updated*: March 2026

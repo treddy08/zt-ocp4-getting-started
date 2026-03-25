@@ -1,42 +1,50 @@
-= Welcome to the OpenShift Getting Started Workshop
-:navtitle: Overview
+= OpenShift Getting Started - OpenShift Concepts
 
-== Overview
+Welcome to *OpenShift Getting Started -- OpenShift Concepts*!
 
-This workshop provides a hands-on introduction to OpenShift from a developer's perspective. Through practical, interactive exercises, you'll learn how to build, deploy, and manage containerized applications on the OpenShift platform.
+In this lab, you'll deploy your first application to OpenShift and understand how all the pieces fit together.
+The goal is simple: get a web app running and accessible from a browser -- using nothing but the command line.
 
-== What You'll Learn
+== What you'll learn
 
-*Getting Started with OpenShift:*
+In this lab, you will:
 
-* Use the OpenShift command line client and web console
-* Navigate the OpenShift developer interface and understand key concepts
+* Deploy a containerized application to OpenShift with a single command
+* Understand the three core building blocks: Pods, Services, and Routes
+* Use the `oc` CLI to inspect, create, and manage OpenShift resources
+* Build an application from a container image to a publicly accessible URL
 
-*Application Deployment and Management:*
+== Who this is for
 
-* Deploy applications using pre-existing container images
-* Deploy applications directly from source code in Git repositories
-* Work with application labels to identify and organize components
-* Scale applications to handle varying traffic loads
+This lab is designed for developers, platform engineers, and DevOps engineers who are new to OpenShift.
+No prior Kubernetes or container experience is required.
 
-*Networking and Access:*
+*Experience level*: Beginner
 
-* Expose applications to external users through routes
-* Configure application networking and service discovery
+== Prerequisites
 
-*Monitoring and Troubleshooting:*
+Before starting this lab, you should have:
 
-* View and analyze application logs for debugging
-* Access application containers for direct interaction and troubleshooting
+* Basic comfort with the command line
+* A web browser
+* No prior OpenShift or Kubernetes experience needed
 
-*Database Integration:*
+== Your lab environment
 
-* Deploy databases from the OpenShift service catalog
-* Configure applications to connect to and use databases
+Your OpenShift environment is pre-configured and ready to use.
 
-*Collaboration and Automation:*
+You will have access to:
 
-* Grant access to other users for collaborative development
-* Set up webhooks to enable automated application builds from code changes
+* OpenShift cluster: {openshift_console_url}
+* Username: `{user}`
+* Password: `{password}`
 
-NOTE: While this workshop uses Java applications, the concepts and techniques apply to applications built with .NET, Node.js, Python, and other runtimes.
+NOTE: Use the *Terminal* tab on the right side of this lab interface to run all commands.
+
+== Estimated time
+
+This lab takes approximately *18 minutes* to complete.
+
+== Let's get started!
+
+Click *Lab Overview* in the left navigation to begin.

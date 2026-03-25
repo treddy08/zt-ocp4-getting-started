@@ -1,0 +1,76 @@
+= Lab Overview
+:toc:
+:toc-placement: preamble
+:icons: font
+
+== Your role and mission
+
+You're a developer at *CloudCo*, a growing software company that recently adopted OpenShift as its
+application platform. Your team has a containerized Hello World app ready to go, and you've been asked
+to get it deployed and running so the rest of the team can start building on top of it.
+
+Your manager kept it simple: "Get the app running on OpenShift and give us a URL we can hit from a browser."
+
+*Your assignment*: Deploy the app using the OpenShift CLI, verify it's healthy, and make it publicly
+accessible -- then understand what OpenShift built behind the scenes to make that happen.
+
+*The objective*: A live, accessible web application on OpenShift, plus the foundational knowledge to
+deploy and manage any containerized app going forward.
+
+== Success criteria
+
+By the end of this lab, you'll be able to:
+
+* Deploy a container image using `oc` → application running in under a minute
+* Inspect a running Pod and check its logs → verify the app is healthy
+* Expose a Deployment as a Service → internal network access established
+* Create a Route for external access → app accessible from any browser
+* Apply labels to organize resources → clean, queryable resource management
+
+== Target audience
+
+This lab is designed for:
+
+* Developers getting started on OpenShift for the first time
+* Platform engineers evaluating OpenShift for their team
+* DevOps engineers looking to build foundational OpenShift skills
+* Anyone comfortable on the command line who wants hands-on OpenShift experience
+
+== Prerequisites
+
+You should have:
+
+* Access to the lab terminal (provided in this interface)
+* Basic comfort with the command line
+* No prior Kubernetes or OpenShift experience required
+
+== The challenge
+
+CloudCo's development team is blocked. The app works locally but hasn't made it to the shared platform
+yet. Every day without a running environment is time the team can't spend building features.
+
+*Current pain points*:
+
+* *No shared environment*: The app only runs on individual developer machines
+* *No external URL*: There's nowhere to point stakeholders, QA, or other teams
+* *No operational understanding*: Without knowing how the platform works, debugging will be painful
+
+*The opportunity*: OpenShift can go from zero to a live, accessible application in minutes.
+You're about to prove that.
+
+== What success looks like
+
+Once you complete this lab:
+
+* A live URL your whole team can access is up and running
+* You understand what Pods, Services, and Routes are doing -- and why they exist
+* You can repeat this workflow for any containerized application
+* The development team is unblocked and can start iterating
+
+== Lab structure
+
+This lab follows a *see it first, then build it* approach:
+
+. *Wow Moment* (3 min) -- The app is already deployed. Explore it, hit the URL, see that it works.
+. *Explore* (5 min) -- Inspect the three resources OpenShift created: Pod, Service, and Route.
+. *Build It Yourself* (10 min) -- Delete the demo app and rebuild it from scratch using the CLI.
