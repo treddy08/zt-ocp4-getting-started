@@ -24,6 +24,35 @@ By the end of this module, you'll be able to:
 * Expose a deployment internally with a Service and externally with a Route
 * Verify application health using `oc` commands and live HTTP requests
 
+== Get connected
+
+Log in to the cluster:
+
+[source,bash,subs="attributes+"]
+----
+oc login {openshift_api_url} --username {user} --password {password}
+----
+
+Confirm you're logged in:
+
+[source,bash]
+----
+oc whoami
+----
+
+Expected output:
+[subs="attributes+"]
+----
+{user}
+----
+
+Two Projects have been provisioned for you:
+
+* `{user}-lab-hello-world` -- contains a pre-deployed application used in Sections 1 and 2
+* `{user}-lab` -- your clean workspace for Section 3
+
+NOTE: In OpenShift, a Project is equivalent to a Kubernetes namespace. It scopes your resources and controls access.
+
 == Section 1: The Existing Deployment (3 minutes)
 
 A Hello World application is already running in your `{user}-lab-hello-world` namespace.

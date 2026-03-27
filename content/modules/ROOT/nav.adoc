@@ -1,4 +1,2 @@
 * xref:index.adoc[Home]
-* xref:01-overview.adoc[Lab Overview]
-* xref:02-connection-details.adoc[Connection Details]
 * xref:03-module-01-openshift-concepts.adoc[Module 1: OpenShift Concepts]

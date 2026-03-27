@@ -1,50 +1,11 @@
-= OpenShift Getting Started - OpenShift Concepts
+= OpenShift Getting Started
 
-Welcome to *OpenShift Getting Started -- OpenShift Concepts*!
+Welcome to the *OpenShift Getting Started* lab series.
 
-In this lab, you'll deploy your first application to OpenShift and understand how all the pieces fit together.
-The goal is simple: get a web app running and accessible from a browser -- using nothing but the command line.
+These labs are designed for developers, platform engineers, and DevOps engineers who are new to OpenShift.
+Each lab is hands-on and self-contained -- you'll work directly on a live OpenShift cluster.
 
-== What you'll learn
+== Labs in this series
 
-In this lab, you will:
-
-* Deploy a containerized application to OpenShift with a single command
-* Understand the three core building blocks: Pods, Services, and Routes
-* Use the `oc` CLI to inspect, create, and manage OpenShift resources
-* Build an application from a container image to a publicly accessible URL
-
-== Who this is for
-
-This lab is designed for developers, platform engineers, and DevOps engineers who are new to OpenShift.
-No prior Kubernetes or container experience is required.
-
-*Experience level*: Beginner
-
-== Prerequisites
-
-Before starting this lab, you should have:
-
-* Basic comfort with the command line
-* A web browser
-* No prior OpenShift or Kubernetes experience needed
-
-== Your lab environment
-
-Your OpenShift environment is pre-configured and ready to use.
-
-You will have access to:
-
-* OpenShift cluster: {openshift_console_url}
-* Username: `{user}`
-* Password: `{password}`
-
-NOTE: Use the *Terminal* tab on the right side of this lab interface to run all commands.
-
-== Estimated time
-
-This lab takes approximately *18 minutes* to complete.
-
-== Let's get started!
-
-Click *Lab Overview* in the left navigation to begin.
+* xref:03-module-01-openshift-concepts.adoc[Module 1: OpenShift Concepts -- Your First Pod] +
+  Deploy a containerized application and learn the core building blocks: Pods, Services, and Routes.
