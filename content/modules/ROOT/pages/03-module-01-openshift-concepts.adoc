@@ -277,7 +277,7 @@ Test it with `curl`:
 
 [source,bash]
 ----
-curl -s https://$(oc get route hello-openshift -o jsonpath='{.spec.host}')
+curl -s http://$(oc get route hello-openshift -o jsonpath='{.spec.host}')
 ----
 
 Expected output:
