@@ -12,8 +12,8 @@ ui:
   bundle:
     url: https://github.com/rhpds/rhdp_showroom_theme/releases/download/rh-summit-2025/ui-bundle.zip
     snapshot: true
-  # supplemental_files:          # TODO: copy supplemental-ui/ from showroom_template_nookbag
-  #   - path: ./content/supplemental-ui
+  supplemental_files:
+    - path: ./content/supplemental-ui
 
 antora:
   extensions:
@@ -39,6 +39,9 @@ asciidoc:
     parksmap_image: quay.io/openshiftroadshow/parksmap:latest
     openshift_docs_url: https://docs.redhat.com/en/documentation/openshift_container_platform/4.20
     openshift_roadshow_url: https://github.com/openshift-roadshow
+
+runtime:
+  fetch: true
 
 output:
   dir: ./www

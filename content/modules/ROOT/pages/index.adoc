@@ -3,7 +3,7 @@
 Welcome to the *OpenShift Getting Started* lab series.
 
 These labs are designed for developers, platform engineers, and DevOps engineers who are new to OpenShift.
-Each lab is hands-on and self-contained -- you'll work directly on a live OpenShift cluster.
+Each lab is hands-on and self-contained: you'll work directly on a live OpenShift cluster.
 
 == Labs in this series
 

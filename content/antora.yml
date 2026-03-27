@@ -5,3 +5,7 @@ nav:
   - modules/ROOT/nav.adoc
 
 start_page: ROOT:index.adoc
+
+asciidoc:
+  attributes:
+    lab_name: OpenShift Getting Started
