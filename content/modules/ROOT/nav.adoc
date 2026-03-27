@@ -1,2 +1,3 @@
 * xref:index.adoc[Home]
 * xref:03-module-01-openshift-concepts.adoc[Module 1: OpenShift Concepts]
+* xref:03-module-01-openshift-concepts-console.adoc[Module 1: OpenShift Concepts (Console)]
