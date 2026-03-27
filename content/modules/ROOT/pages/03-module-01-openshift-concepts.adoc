@@ -26,7 +26,23 @@ By the end of this module, you'll be able to:
 
 == Get connected
 
-Log in to the cluster:
+=== OpenShift Web Console
+
+The OpenShift web console gives you a visual interface to explore and manage your cluster.
+To open it, click the *Console* tab on the right side of this lab interface.
+
+Log in with these credentials:
+
+* *Username*: `{user}`
+* *Password*: `{password}`
+* *Console URL*: {openshift_console_url}
+
+=== Terminal (CLI)
+
+Most steps in this lab use the `oc` command-line tool. To open a terminal, click the *Terminal* tab
+on the right side of this lab interface. The `oc` CLI is pre-installed and ready to use.
+
+Log in to the cluster by running this command in the terminal:
 
 [source,bash,subs="attributes+"]
 ----
@@ -45,6 +61,8 @@ Expected output:
 ----
 {user}
 ----
+
+=== Your lab Projects
 
 Two Projects have been provisioned for you:
 
