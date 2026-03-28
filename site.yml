@@ -18,6 +18,7 @@ ui:
 antora:
   extensions:
     - '@sntke/antora-mermaid-extension'
+    - '@antora/tabs-extension'
 
 asciidoc:
   attributes:
