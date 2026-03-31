@@ -8,15 +8,20 @@ In this module you will deploy *DataSphere* — a 2-tier operations dashboard �
 from a pre-built container image, from source code using Source-to-Image, and as a packaged Helm chart.
 
 DataSphere has 2 components: a React frontend served by Nginx (`datasphere-ui`), and a Python REST API
-(`datasphere-api`). The UI proxies all `/api/` requests to the API by Service name — no manual wiring
-or IP addresses needed.
+(`datasphere-api`). The frontend talks to the API entirely by Service name — OpenShift's internal DNS
+resolves it automatically.
 
 [mermaid]
 ....
-flowchart LR
-    B["🌐 Browser"] -->|"HTTPS"| R["Route\n(datasphere-ui)"]
-    R --> UI["datasphere-ui\n(React + Nginx)"]
-    UI -->|"/api/* → datasphere-api:8080"| API["datasphere-api\n(Python FastAPI)"]
+flowchart TB
+    B["🌐 Browser"]
+    R["Route\n(datasphere-ui)"]
+    UI["datasphere-ui\nReact + Nginx"]
+    API["datasphere-api\nPython FastAPI"]
+
+    B -->|"HTTPS"| R
+    R --> UI
+    UI -->|"/api/* forwarded to\ndatasphere-api:8080"| API
 ....
 
 toc::[]
@@ -116,18 +121,19 @@ Now using project "{user}-datasphere" on server "{openshift_api_url}".
 ----
 ====
 
-Get the URL and open it in your browser:
+Get the application URL:
 
 [source,role="execute"]
 ----
 oc get route datasphere-ui -o jsonpath='{.spec.host}'
 ----
 
-You'll see a live map of global datacenter sites with capacity and status data.
-Click a site to toggle its status and watch the map respond.
+Open that URL in your browser. You'll see a live map of global datacenter sites with capacity and status data.
+Click a site to toggle its status and watch the map update in real time.
 
-That's a 2-tier application running on OpenShift, accessible from anywhere on the internet.
-Now build it yourself.
+This is a live, running application — 2 pods, 2 services, a route, and a configmap — all provisioned
+automatically when your lab environment was created. By the end of this module, you'll have built
+the same thing yourself using 3 different approaches.
 
 == Section 2: Deploy it yourself (10 minutes)
 
@@ -149,7 +155,8 @@ Now using project "{user}-lab" on server "{openshift_api_url}".
 
 === Step 2.1: Deploy the UI from a container image
 
-The UI image is already built and published. Deploy it directly:
+The UI image is already built and published to a container registry.
+Deploy it with a single command:
 
 [source,role="execute"]
 ----
@@ -173,10 +180,12 @@ oc new-app quay.io/rhdp/datasphere-ui:1.0.0 --name=datasphere-ui
 ----
 ====
 
-`oc new-app` created 3 resources in one command: an ImageStream to track the image,
-a Deployment to manage the pods, and a Service for internal network access.
+Notice what `oc new-app` did in one shot: it created a Deployment to run and manage the container,
+a Service so other components can reach the UI internally, and an ImageStream to track the image version.
+No YAML written. No pod spec authored.
 
-Create a Route to make the UI publicly accessible:
+The output also tells you the app isn't exposed yet — there's a Service for internal access,
+but nothing public-facing. Fix that now:
 
 [source,role="execute"]
 ----
@@ -191,6 +200,7 @@ route.route.openshift.io/datasphere-ui exposed
 ----
 ====
 
+A Route was just created with a public hostname and TLS termination handled by OpenShift automatically.
 Wait for the pod to come up:
 
 [source,role="execute"]
@@ -206,20 +216,26 @@ deployment "datasphere-ui" successfully rolled out
 ----
 ====
 
-Open the URL — the page loads, but the map is empty.
-The UI is running but has no API to talk to yet. That's expected.
+Open the URL in your browser:
 
 [source,role="execute"]
 ----
 oc get route datasphere-ui -o jsonpath='{.spec.host}'
 ----
 
+The page loads — but the map is empty. That's not a bug. The UI is working exactly as it should:
+it's already trying to reach the API at `datasphere-api:8080`, but there's no pod answering
+that address yet. You'll add the API next, and the UI will find it on its own.
+
 === Step 2.2: Build the API from source code
 
 The API source code lives in a Git repository.
-Point OpenShift at it and it handles the rest — this is *Source-to-Image* (S2I):
-OpenShift detects the language, installs dependencies, and packages the result into a
-container image automatically, with no Dockerfile required.
+Rather than building a container image locally and pushing it yourself, you point OpenShift at
+the repository and let it do the work. This is *Source-to-Image* (S2I).
+
+The `python~` prefix tells OpenShift two things: use the Python builder image, and the source
+is what follows. OpenShift clones the repo, detects the `requirements.txt`, installs dependencies,
+and packages everything into a container image — all inside the cluster, with no Dockerfile required.
 
 [source,role="execute",subs="attributes+"]
 ----
@@ -243,8 +259,9 @@ oc new-app python~{datasphere_api_repo} --name=datasphere-api
 ----
 ====
 
-OpenShift is now cloning the repository, installing Python dependencies, and packaging
-the result into a container image. Watch it happen:
+This time `oc new-app` created a `buildconfig` in addition to the Deployment and Service.
+The BuildConfig is the S2I build definition — it's what OpenShift will use every time you want
+to rebuild the API from source. Watch the first build run:
 
 [source,role="execute"]
 ----
@@ -267,7 +284,12 @@ Push successful
 ----
 ====
 
-Once the build finishes, OpenShift automatically deploys the result. Wait for the rollout:
+That entire build ran inside the cluster: no Docker installed locally, no CI/CD pipeline configured,
+no image registry account needed. OpenShift pulled the code, installed dependencies, built and
+tagged the image, pushed it to its internal registry, and is now deploying it — all from
+one `oc new-app` command.
+
+Wait for the deployment to finish:
 
 [source,role="execute"]
 ----
@@ -291,14 +313,22 @@ Open the UI URL again:
 oc get route datasphere-ui -o jsonpath='{.spec.host}'
 ----
 
-The map is now populated. The UI found the API automatically — the Nginx reverse proxy resolves
-`datasphere-api` to the Service by name. No configuration changes needed.
+The map is now populated with datacenter sites — and you didn't touch the UI at all.
+The moment `datasphere-api` came online, the UI found it automatically. OpenShift's internal DNS
+resolved the Service name `datasphere-api` to the running pod, and the Nginx reverse proxy
+started forwarding requests to it.
+
+This is service discovery in practice: components find each other by name, not by IP address.
+Add a backend, and the frontend connects to it. No reconfiguration required.
 
 == Section 3: Deploy the full stack as a Helm chart (3 minutes)
 
-You deployed DataSphere in a handful of commands across 2 steps.
-Helm packages all of those resources so the entire application installs, upgrades,
-and removes as a single unit.
+You just deployed DataSphere in a series of individual commands — each one creating a specific
+resource. Helm packages all of those resources into a single installable unit called a *chart*.
+
+A Helm chart for DataSphere defines the same Deployments, Services, and Route you created manually,
+but with one important difference: the entire application installs, upgrades, and removes as
+a single operation. This is how teams package applications for repeatable deployments.
 
 Create a new Project:
 
@@ -358,7 +388,9 @@ Open the application:
 oc get route datasphere-ui -o jsonpath='{.spec.host}'
 ----
 
-The same 2-tier application, fully operational, from a single command.
+The same 2-tier application — fully operational. Every resource you created manually in Section 2
+was created here by a single command. That's what Helm gives you: the same result, with no
+opportunity for steps to be missed or applied in the wrong order.
 
 NOTE: To remove the entire application: `helm uninstall datasphere`
 
@@ -368,9 +400,9 @@ You deployed the same 2-tier application using 3 different methods.
 
 *The 3 deployment methods:*
 
-* *Container image*: fastest path when the image is already built and published
-* *Source-to-Image*: build directly from a Git repository; OpenShift handles the container build
-* *Helm chart*: package the entire application for repeatable, version-controlled deployments
+* *Container image*: fastest path when the image is already built and published. No build step, no source code required.
+* *Source-to-Image*: point OpenShift at a Git repository and it builds, packages, and deploys the application. No Dockerfile, no local tooling required.
+* *Helm chart*: package the entire multi-component application for repeatable, version-controlled deployments. Install or remove the whole stack in one command.
 
 *Next steps:*
 
