@@ -47,7 +47,7 @@ Deploy the DataSphere UI and expose it:
 [source,role="execute",subs="attributes+"]
 ----
 oc project {user}-lab
-oc new-app quay.io/nstephan/datasphere-ui:1.0.1-03 --name=datasphere-ui
+oc new-app {datasphere_ui_image} --name=datasphere-ui
 oc create route edge --service=datasphere-ui --insecure-policy=Redirect
 oc rollout status deployment/datasphere-ui
 ----
@@ -123,7 +123,7 @@ with no Dockerfile required.
 
 [source,role="execute",subs="attributes+"]
 ----
-oc new-app python~{datasphere_api_repo} --name=datasphere-api
+oc new-app python~{datasphere_api_repo} --context-dir=datasphere/api --name=datasphere-api
 ----
 
 [%collapsible]

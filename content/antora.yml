@@ -9,3 +9,5 @@ start_page: ROOT:index.adoc
 asciidoc:
   attributes:
     lab_name: OpenShift Getting Started
+    datasphere_ui_image: quay.io/nstephan/datasphere-ui:1.0.1-05
+    datasphere_api_repo: https://github.com/rhpds/ocp4-getting-started-automation#add-datasphere-app

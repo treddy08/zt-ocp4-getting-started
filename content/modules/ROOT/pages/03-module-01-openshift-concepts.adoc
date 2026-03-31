@@ -359,16 +359,16 @@ Now using project "{user}-lab" on server "{openshift_api_url}".
 
 Deploy the DataSphere UI from its container image:
 
-[source,role="execute"]
+[source,role="execute",subs="attributes+"]
 ----
-oc new-app quay.io/nstephan/datasphere-ui:1.0.1-03 --name=datasphere-ui
+oc new-app {datasphere_ui_image} --name=datasphere-ui
 ----
 
 [%collapsible]
 .Expected output
 ====
 ----
---> Found container image ... (quay.io/nstephan/datasphere-ui:1.0.0)
+--> Found container image ... ({datasphere_ui_image})
     ...
 --> Creating resources ...
     imagestream.image.openshift.io "datasphere-ui" created
@@ -376,7 +376,7 @@ oc new-app quay.io/nstephan/datasphere-ui:1.0.1-03 --name=datasphere-ui
     service "datasphere-ui" created
 --> Success
     Application is not exposed. You can expose services to the outside world by executing one or more of the commands below:
-     'oc expose service/datasphere-ui'
+     'oc create route edge --service=datasphere-ui'
     Run 'oc status' to view your app.
 ----
 ====
