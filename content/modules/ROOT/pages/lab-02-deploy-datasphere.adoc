@@ -1,4 +1,4 @@
-= Module 2: 3 Ways to Deploy an Application
+= Module 2: Expanding and Automating Your Application Deployment
 :source-highlighter: rouge
 :toc: macro
 :toclevels: 2
@@ -69,21 +69,7 @@ Before you build anything, confirm what the finished result looks like.
 
 [source,role="execute",subs="attributes+"]
 ----
-oc project {user}-datasphere
-----
-
-[%collapsible]
-.Expected output
-====
-[subs="attributes+"]
-----
-Now using project "{user}-datasphere" on server "{openshift_api_url}".
-----
-====
-
-[source,role="execute"]
-----
-oc get route datasphere-ui -o jsonpath='{.spec.host}'
+oc project {user}-datasphere && oc get route datasphere-ui -o jsonpath='{.spec.host}'
 ----
 
 Open that URL. The map is fully populated — datacenter sites with live status and capacity data.
@@ -97,15 +83,6 @@ Switch back to your lab Project where `datasphere-ui` is already running:
 ----
 oc project {user}-lab
 ----
-
-[%collapsible]
-.Expected output
-====
-[subs="attributes+"]
-----
-Now using project "{user}-lab" on server "{openshift_api_url}".
-----
-====
 
 The UI is running but the map is empty. The frontend is already calling `datasphere-api:8080`
 on every page load — there's just nothing answering yet.
@@ -229,32 +206,26 @@ Service, which routes to the pod. Add a backend, the frontend connects to it. Th
 You deployed DataSphere in 2 stages: the UI in Lab 1 (or Quick Start), the API in Section 2.
 Helm packages all of those resources into a single installable unit — a *chart*.
 
-The DataSphere chart defines the same Deployments, Services, and Route you created across those
-2 stages, but bundled so the entire application installs, upgrades, and removes as one operation.
-This is how teams ship multi-component applications repeatably.
+A chart is a directory of templated Kubernetes manifests plus a `values.yaml` file that controls
+configurable inputs (image tags, theme, replica count, and so on). When you run `helm install`,
+Helm renders those templates with your chosen values and submits all the resulting manifests to
+the cluster in one shot. It also records what it installed as a named *release*, so it can
+upgrade, roll back, or cleanly remove every resource it owns.
 
-Switch to your pre-provisioned Helm Project:
+The DataSphere chart defines the same Deployments, Services, and Route you created manually
+across the last two sections — but as a single, versioned, repeatable unit. Every team member
+who runs this command gets the same result.
 
-[source,role="execute",subs="attributes+"]
-----
-oc project {user}-lab-helm
-----
-
-[%collapsible]
-.Expected output
-====
-[subs="attributes+"]
-----
-Now using project "{user}-lab-helm" on server "{openshift_api_url}".
-----
-====
-
-Install the DataSphere chart directly from the OCI registry:
+Switch to your pre-provisioned Helm Project and install the DataSphere chart:
 
 [source,role="execute",subs="attributes+"]
 ----
-helm install datasphere {datasphere_helm_chart} --version {datasphere_helm_version}
+oc project {user}-lab-helm && helm install datasphere {datasphere_helm_chart} --version {datasphere_helm_version}
 ----
+
+The first argument after `helm install` is the *release name* (`datasphere`). Helm uses it to
+track this installation. The second argument is the chart location. `--version` pins the chart
+version so you always get exactly what you tested.
 
 NOTE: The same chart is also available in the OpenShift *Developer Catalog* — the console version
 of this lab walks through the UI flow. From the CLI, `helm` talks to the OCI registry directly.
@@ -271,6 +242,9 @@ STATUS: deployed
 REVISION: 1
 ----
 ====
+
+`REVISION: 1` tells you this is the first install. Each `helm upgrade` increments the revision
+and Helm keeps the history — you can roll back to any previous revision if something goes wrong.
 
 Wait for both components:
 
@@ -299,7 +273,24 @@ Both tiers, fully operational, from a single command. Every resource you created
 and Lab 2 was created here in one shot — with no opportunity for steps to be missed or
 applied in the wrong order.
 
-NOTE: To remove the entire application: `helm uninstall datasphere`
+Want to see how configuration changes work? The chart supports a `theme` value that swaps the
+map color palette. Try it without redeploying anything:
+
+[source,role="execute"]
+----
+helm upgrade datasphere {datasphere_helm_chart} --version {datasphere_helm_version} --set theme=mars
+----
+
+Helm re-renders only the resources that changed, applies them, and rolls the affected pod.
+Refresh the app in your browser — the map shifts to the Mars color scheme. Roll it back
+just as easily:
+
+[source,role="execute"]
+----
+helm upgrade datasphere {datasphere_helm_chart} --version {datasphere_helm_version}
+----
+
+NOTE: To remove the entire application and every resource it created: `helm uninstall datasphere`
 
 == Module summary
 

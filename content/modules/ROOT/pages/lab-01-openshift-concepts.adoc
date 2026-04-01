@@ -1,4 +1,4 @@
-= Module 1: OpenShift Concepts -- Your First Deployment
+= Module 1: Your First Application
 :source-highlighter: rouge
 :toc: macro
 :toclevels: 2
@@ -98,27 +98,11 @@ The full DataSphere application is already running in your `{user}-datasphere` P
 It was deployed automatically when your lab environment was provisioned.
 Before you build anything, let's see what the finished result looks like.
 
-=== Step 1.1: Switch to your pre-deployed Project
+=== Step 1.1: Switch to your pre-deployed Project and see what's running
 
 [source,role="execute",subs="attributes+"]
 ----
-oc project {user}-datasphere
-----
-
-[%collapsible]
-.Expected output
-====
-[subs="attributes+"]
-----
-Now using project "{user}-datasphere" on server "{openshift_api_url}".
-----
-====
-
-=== Step 1.2: See what's running
-
-[source,role="execute"]
-----
-oc get all
+oc project {user}-datasphere && oc get all
 ----
 
 [%collapsible]
@@ -341,29 +325,13 @@ The Pod runs your container.
 == Section 3: Build it yourself (8 minutes)
 
 Now that you understand the pieces, let's build the frontend from scratch.
-Switch to your clean lab Project:
-
-[source,role="execute",subs="attributes+"]
-----
-oc project {user}-lab
-----
-
-[%collapsible]
-.Expected output
-====
-[subs="attributes+"]
-----
-Now using project "{user}-lab" on server "{openshift_api_url}".
-----
-====
+Switch to your clean lab Project and deploy the DataSphere UI from its container image:
 
 === Step 3.1: Deploy the application
 
-Deploy the DataSphere UI from its container image:
-
 [source,role="execute",subs="attributes+"]
 ----
-oc new-app {datasphere_ui_image} --name=datasphere-ui
+oc project {user}-lab && oc new-app {datasphere_ui_image} --name=datasphere-ui
 ----
 
 [%collapsible]
