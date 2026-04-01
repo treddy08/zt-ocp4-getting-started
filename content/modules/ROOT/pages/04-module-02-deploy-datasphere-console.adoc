@@ -1,0 +1,352 @@
+= Module 2: 3 Ways to Deploy an Application (Web Console)
+:source-highlighter: rouge
+:toc: macro
+:toclevels: 2
+
+There is no single right way to get an application running on OpenShift.
+In this module you will deploy *DataSphere* — a 2-tier operations dashboard — using 3 different methods:
+from a pre-built container image, from source code using Source-to-Image, and as a packaged Helm chart.
+
+Each method has its place, and by the end you will know when to reach for each one.
+
+toc::[]
+
+== Learning objectives
+
+By the end of this module, you'll be able to:
+
+* Deploy an application from a pre-built container image using the web console
+* Trigger a Source-to-Image build from a Git repository using the web console
+* Deploy a multi-component application in a single command using a Helm chart
+* Understand when each deployment method is the right choice
+
+== Get connected
+
+=== OpenShift Web Console
+
+All steps in this module use the OpenShift web console. To open it, click the *Console* tab
+on the right side of this lab interface.
+
+Log in with these credentials:
+
+* *Username*: `{user}`
+* *Password*: `{password}`
+* *Console URL*: {openshift_console_url}
+
+After logging in, make sure you are in the *Developer* perspective.
+If you see *Administrator* in the top-left dropdown, click it and switch to *Developer*.
+
+=== Terminal (CLI)
+
+A terminal is required for the Helm section (Section 4). To open one, click the *Terminal* tab
+on the right side of this lab interface.
+
+Log in to the cluster:
+
+[source,role="execute",subs="attributes+"]
+----
+oc login {openshift_api_url} --username {user} --password {password}
+----
+
+[%collapsible]
+.Expected output
+====
+[subs="attributes+"]
+----
+Login successful.
+
+You have access to the following projects and can switch between them with 'oc project <projectname>':
+
+  * {user}-datasphere
+    {user}-lab
+
+Using project "{user}-datasphere".
+----
+====
+
+=== Your lab Projects
+
+2 Projects have been provisioned for you:
+
+* `{user}-datasphere`: contains a pre-deployed DataSphere application used in Sections 1 and 2
+* `{user}-lab`: your clean workspace for Section 3
+
+NOTE: In OpenShift, a Project is equivalent to a Kubernetes namespace. It scopes your resources and controls access.
+
+== Section 1: See the finished application (3 minutes)
+
+DataSphere is already running in your `{user}-datasphere` Project.
+It was deployed automatically when your lab environment was provisioned.
+Before you build anything, take a look at the finished result.
+
+=== Step 1.1: Switch to the pre-deployed Project
+
+In the web console, click the *Project* dropdown at the top of the page and select
+`{user}-datasphere`.
+
+=== Step 1.2: Explore the Topology view
+
+In the left navigation, click *Topology*.
+
+You'll see 2 components connected by a line: `datasphere-ui` and `datasphere-api`.
+The arrow between them represents the network connection from the UI to the API.
+
+//TODO: add screenshot of Topology view showing both components
+
+=== Step 1.3: Open the application
+
+Click the *open URL* icon (the small arrow box) on the `datasphere-ui` component.
+
+You'll see a live map of global datacenter sites with capacity and status data.
+Click a site to toggle its status and watch the map respond.
+
+That's a 2-tier application — a React frontend backed by a Python REST API — running on OpenShift
+and accessible from anywhere on the internet.
+
+Now let's understand how it works.
+
+== Section 2: Explore the architecture (5 minutes)
+
+=== The frontend: datasphere-ui
+
+In the Topology view, click the `datasphere-ui` component to open its side panel.
+Click *Actions* → *Edit Deployment* to see its configuration.
+
+Under *Container*, note the image: `quay.io/nstephan/datasphere-ui:1.0.2`.
+
+The image is pulled from a container registry and run directly.
+No source code was compiled. No build was needed.
+
+//TODO: add screenshot of the datasphere-ui deployment detail panel showing the image
+
+=== The backend: datasphere-api
+
+Click the `datasphere-api` component in the Topology view.
+
+Under *Container*, note the image: `quay.io/nstephan/datasphere-api:1.0.0`.
+
+In this pre-deployed version, the API runs from a pre-built image.
+In Section 3, you will build it from source code instead.
+
+=== How they connect
+
+Click *Topology* to return to the main view. Click on the line connecting the 2 components
+to see the connection details.
+
+In the left navigation, click *Project* → *Services*. Notice that `datasphere-api` has
+no Route: it's only reachable from within the cluster.
+The UI talks to it by Service name. OpenShift's internal DNS resolves that name to the correct
+pod automatically, even as pods restart and change IP addresses.
+
+[mermaid]
+....
+flowchart LR
+    B["🌐 Browser"] -->|"HTTPS"| R["Route\n(datasphere-ui)"]
+    R --> UI["datasphere-ui\n(React + Nginx)"]
+    UI -->|"/api/* → datasphere-api:8080"| API["datasphere-api\n(Python FastAPI)"]
+....
+
+== Section 3: Deploy it yourself (12 minutes)
+
+Now you'll build the same 2-tier application from scratch.
+
+Switch to your clean lab Project by clicking the *Project* dropdown and selecting `{user}-lab`.
+
+In the Topology view, you'll see an empty canvas with an *+Add* prompt in the center.
+
+=== Step 3.1: Deploy the UI from a container image
+
+Click *+Add* in the left navigation (or the prompt in the Topology canvas).
+
+Select *Container images*.
+
+//TODO: add screenshot of the +Add menu
+
+Fill in the form:
+
+* *Image name from external registry*: `quay.io/nstephan/datasphere-ui:1.0.2`
+* Wait for the image to be validated (a green checkmark appears)
+* *Application name*: `datasphere`
+* *Name*: `datasphere-ui`
+* Under *Resource type*, select *Deployment*
+* Under *Advanced options*, make sure *Create a route to the Application* is checked
+
+//TODO: add screenshot of the Container images form filled in
+
+Click *Create*.
+
+You'll be returned to the Topology view. A new `datasphere-ui` component appears with a
+spinning build indicator. Wait until the indicator turns solid (pod is Running).
+
+//TODO: add screenshot of Topology showing datasphere-ui deploying
+
+Click the *open URL* icon on `datasphere-ui` to open it in your browser.
+
+The page loads, but the map is empty. The UI is running, but it has no API to talk to yet.
+That's expected — you'll fix that in the next step.
+
+=== Step 3.2: Build the API from source code
+
+Click *+Add* and select *Import from Git*.
+
+//TODO: add screenshot of Import from Git form
+
+Fill in the form:
+
+* *Git Repo URL*: `{datasphere_api_repo}`
+* Wait for the repository to be validated
+* OpenShift auto-detects the Python language and selects the *Python* builder image
+
+NOTE: This is Source-to-Image (S2I) in action. OpenShift reads the repository, identifies the
+language, and selects the right builder automatically. No Dockerfile required.
+
+Scroll down and set:
+
+* *Application*: select `datasphere` (same application group as the UI)
+* *Name*: `datasphere-api`
+* Under *Advanced options*, *uncheck* *Create a route to the Application*
+
+The API only needs to be reachable from within the cluster — it doesn't need a public URL.
+
+//TODO: add screenshot of the form with datasphere-api configuration
+
+Click *Create*.
+
+In the Topology view, the `datasphere-api` component appears with a build animation.
+Click on the component and select the *Builds* tab to watch the build progress.
+
+//TODO: add screenshot of Builds tab showing the S2I build running
+
+The build clones the repository, installs Python dependencies, and packages the result
+into a container image stored in the cluster's internal registry. This takes 2-3 minutes.
+
+Once the build finishes and the pod turns Running, return to your browser tab with the
+DataSphere UI and reload the page.
+
+The map is now populated with datacenter sites. The UI found the API automatically — no
+configuration changes needed. The Service name `datasphere-api` is the same in both Projects,
+so the Nginx proxy connects without any manual wiring.
+
+//TODO: add screenshot of the fully working DataSphere map
+
+=== Step 3.3: Review the Topology
+
+In the Topology view, both components should now show a solid ring (Running).
+A line connects `datasphere-ui` to `datasphere-api`, representing the internal network path.
+
+//TODO: add screenshot of complete Topology with both components running and connected
+
+Click on `datasphere-api` to open its side panel. Notice:
+
+* Under *Builds*, you can see the completed S2I build
+* The image it's running was built inside OpenShift from your Git repository
+* There is no Route — this service is internal only
+
+== Section 4: Deploy the full stack as a Helm chart (5 minutes)
+
+You deployed DataSphere manually in 2 steps using the console.
+Helm lets you package all of those resources into a single installable unit.
+
+This section uses the terminal. Click the *Terminal* tab on the right side of this lab interface.
+
+Create a new Project:
+
+[source,role="execute",subs="attributes+"]
+----
+oc new-project {user}-datasphere-helm
+----
+
+[%collapsible]
+.Expected output
+====
+[subs="attributes+"]
+----
+Now using project "{user}-datasphere-helm" on server "{openshift_api_url}".
+----
+====
+
+The DataSphere Helm chart is pre-staged in your home directory. Install it:
+
+[source,role="execute"]
+----
+helm install datasphere ~/datasphere-gitops
+----
+
+[%collapsible]
+.Expected output
+====
+----
+NAME: datasphere
+LAST DEPLOYED: ...
+NAMESPACE: {user}-datasphere-helm
+STATUS: deployed
+REVISION: 1
+NOTES:
+DataSphere deployed. Get the UI URL with:
+  oc get route datasphere-ui -o jsonpath='{.spec.host}'
+----
+====
+
+Wait for both pods to come up:
+
+[source,role="execute"]
+----
+oc rollout status deployment/datasphere-ui && oc rollout status deployment/datasphere-api
+----
+
+[%collapsible]
+.Expected output
+====
+----
+deployment "datasphere-ui" successfully rolled out
+deployment "datasphere-api" successfully rolled out
+----
+====
+
+Switch back to the *Console* tab in the Showroom interface.
+In the web console, switch to the `{user}-datasphere-helm` Project and open the Topology view.
+
+//TODO: add screenshot of Topology for the Helm-deployed project
+
+Both components appear — identical to what you built manually, deployed from a single command.
+
+Click the *open URL* icon on `datasphere-ui` to confirm the application is working.
+
+When you're done, remove the entire application from the terminal:
+
+[source,role="execute"]
+----
+helm uninstall datasphere
+----
+
+[%collapsible]
+.Expected output
+====
+----
+release "datasphere" uninstalled
+----
+====
+
+Watch the Topology view in the console — both components disappear as the resources are deleted.
+
+== Module summary
+
+You deployed the same 2-tier application using 3 different methods.
+
+*What you accomplished:*
+
+* Deployed a pre-built container image using *Container images* in the web console
+* Built a Python application from a Git repository using *Import from Git* (Source-to-Image)
+* Deployed the complete stack with `helm install`
+* Observed how OpenShift's internal DNS connects components automatically by Service name
+
+*The 3 deployment methods:*
+
+* *Container image*: fastest path when the image is already built and published
+* *Source-to-Image*: build directly from a Git repository; OpenShift handles the container build
+* *Helm chart*: package the entire application for repeatable, version-controlled deployments
+
+*Next steps:*
+
+DataSphere is running. The next module covers scaling and self-healing: what happens when pods fail,
+and how OpenShift keeps your application available automatically.

@@ -1,0 +1,793 @@
+= Module 1: OpenShift Concepts -- Your First Pod
+:source-highlighter: rouge
+:toc: macro
+:toclevels: 2
+
+Your team at CloudCo is ready to start building. The application is containerized and the OpenShift
+cluster is running. All that's standing between your team and a working development environment is
+a deployment.
+
+In this module, you'll first see the finished result: a running, publicly accessible application.
+Then tear it down and rebuild it from scratch using the `oc` CLI or the web console.
+
+By the end, you'll understand the 3 core building blocks that make every OpenShift application work:
+*Pods*, *Services*, and *Routes*.
+
+toc::[]
+
+== Learning objectives
+
+By the end of this module, you'll be able to:
+
+* Identify and describe the role of Pods, Services, and Routes in OpenShift
+* Deploy a containerized application using the `oc` CLI or the web console
+* Expose a deployment internally with a Service and externally with a Route
+* Verify application health using `oc` commands or the web console
+
+== Get connected
+
+=== OpenShift Web Console
+
+The OpenShift web console gives you a visual interface to explore and manage your cluster.
+To open it, click the *Console* tab on the right side of this lab interface.
+
+Log in with these credentials:
+
+* *Username*: `{user}`
+* *Password*: `{password}`
+* *Console URL*: {openshift_console_url}
+
+=== Terminal (CLI)
+
+Most steps in this lab use the `oc` command-line tool. To open a terminal, click the *Terminal* tab
+on the right side of this lab interface. The `oc` CLI is pre-installed and ready to use.
+
+Log in to the cluster by running this command in the terminal:
+
+[source,role="execute",subs="attributes+"]
+----
+oc login {openshift_api_url} --username {user} --password {password}
+----
+
+[%collapsible]
+.Expected output
+====
+[subs="attributes+"]
+----
+Login successful.
+
+You have access to the following projects and can switch between them with 'oc project <projectname>':
+
+  * {user}-lab
+    {user}-lab-hello-world
+
+Using project "{user}-lab".
+Welcome! See 'oc help' to get started.
+----
+====
+
+Confirm you're logged in:
+
+[source,role="execute"]
+----
+oc whoami
+----
+
+[%collapsible]
+.Expected output
+====
+[subs="attributes+"]
+----
+{user}
+----
+====
+
+=== Your lab Projects
+
+Two Projects have been provisioned for you:
+
+* `{user}-lab-hello-world`: contains a pre-deployed application used in Sections 1 and 2
+* `{user}-lab`: your clean workspace for Section 3
+
+NOTE: In OpenShift, a Project is equivalent to a Kubernetes namespace. It scopes your resources and controls access.
+
+== Section 1: The Existing Deployment (3 minutes)
+
+A Hello World application is already running in your `{user}-lab-hello-world` namespace.
+It was deployed automatically when your lab environment was provisioned.
+Before you build anything, let's see what the finished result looks like.
+
+=== Step 1.1: Switch to your pre-deployed namespace
+
+==== Using the Terminal (CLI)
+
+[source,role="execute",subs="attributes+"]
+----
+oc project {user}-lab-hello-world
+----
+
+[%collapsible]
+.Expected output
+====
+[subs="attributes+"]
+----
+Now using project "{user}-lab-hello-world" on server "{openshift_api_url}".
+----
+====
+
+==== Using the Web Console
+
+. In the left navigation, click *Home* -> *Projects*.
++
+You will see two projects listed:
++
+* `{user}-lab`: your clean workspace for building from scratch
+* `{user}-lab-hello-world`: contains the pre-deployed application
+
+. Click on *{user}-lab-hello-world* to open the project overview.
+
+image::console-guide/03-module-01-openshift-concepts/01-projects-list_with_arrows.png[Projects page showing your two lab projects]
+
+=== Step 1.2: See what's running
+
+==== Using the Terminal (CLI)
+
+[source,role="execute"]
+----
+oc get all
+----
+
+You'll see several resources: a Deployment, a Pod, a Service, and a Route.
+These resources work together to run your application and expose it to the internet.
+Soon, we will explore and explain what each of them does.
+
+[%collapsible]
+.Expected output
+====
+----
+NAME                               READY   STATUS    RESTARTS   AGE
+pod/hello-world-78c55b56b9-x76k8   1/1     Running   0          7m22s
+
+NAME                  TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+service/hello-world   ClusterIP   172.x.x.x        <none>        8080/TCP   7m23s
+
+NAME                          READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/hello-world   1/1     1            1           7m23s
+
+NAME                                     DESIRED   CURRENT   READY   AGE
+replicaset.apps/hello-world-78c55b56b9   1         1         1       7m22s
+
+NAME                                   HOST/PORT                             PATH   SERVICES      PORT   TERMINATION     WILDCARD
+route.route.openshift.io/hello-world   hello-world-xxx.apps.example.com             hello-world   http   edge/Redirect   None
+----
+====
+
+==== Using the Web Console
+
+. In the left navigation, click *Workloads* -> *Deployments*.
++
+You will see the *hello-world* deployment listed with *1 of 1 pods* running. Notice the labels column showing `app=hello-world` -- this label is how OpenShift connects resources together.
+
+image::console-guide/03-module-01-openshift-concepts/02-deployments-list.png[Deployments page showing hello-world with 1 of 1 pods]
+
+=== Step 1.3: Get the application URL
+
+==== Using the Terminal (CLI)
+
+[source,role="execute"]
+----
+oc get route hello-world
+----
+
+[%collapsible]
+.Expected output
+====
+----
+NAME          HOST/PORT                             PATH   SERVICES      PORT   TERMINATION     WILDCARD
+hello-world   hello-world-xxx.apps.example.com             hello-world   http   edge/Redirect   None
+----
+====
+
+Copy that URL and open it in your browser.
+
+You'll see a web page displaying a welcome message.
+
+==== Using the Web Console
+
+. In the left navigation, click *Networking* -> *Routes*.
++
+You will see the *hello-world* Route with its public URL in the *Location* column. The status shows *Accepted*, meaning the Route is active and serving traffic.
+
+. Click the URL in the Location column to open the application in your browser. You will see a welcome message: that's your pre-deployed application running on OpenShift.
+
+image::console-guide/03-module-01-openshift-concepts/03-routes-list_with_arrows.png[Routes page showing hello-world route with public URL]
+
+'''
+
+That's a fully configured containerized web application, running on OpenShift, accessible
+from anywhere on the internet.
+
+Now let's understand what made that possible.
+
+== Section 2: Explore the pieces (5 minutes)
+
+Every application on OpenShift is made up of the same 3 core resources.
+Let's inspect each one and understand what it does.
+
+=== The Pod: where your application runs
+
+A *Pod* is the smallest deployable unit in OpenShift. It wraps one or more containers and gives them
+a shared network and storage context.
+
+==== Using the Terminal (CLI)
+
+List the pods in your namespace:
+
+[source,role="execute"]
+----
+oc get pods
+----
+
+[%collapsible]
+.Expected output
+====
+----
+NAME                           READY   STATUS    RESTARTS   AGE
+hello-world-78c55b56b9-x76k8   1/1     Running   0          7m42s
+----
+====
+
+Inspect the pod in detail:
+
+[source,role="execute"]
+----
+oc describe pod -l app=hello-world
+----
+
+[%collapsible]
+.Expected output (key fields)
+====
+----
+Name:         hello-world-78c55b56b9-x76k8
+Namespace:    user-xxx-lab-hello-world
+Labels:       app=hello-world
+              pod-template-hash=78c55b56b9
+Containers:
+  hello-world:
+    Image:    registry.access.redhat.com/ubi8/httpd-24:latest
+    Port:     8080/TCP
+    State:    Running
+    Ready:    True
+Conditions:
+  Ready:      True
+----
+====
+
+Check the application logs:
+
+[source,role="execute"]
+----
+oc logs -l app=hello-world
+----
+
+[%collapsible]
+.Expected output (truncated)
+====
+----
+AH00558: httpd: Could not reliably determine the server's fully qualified domain name
+[...] Apache/2.4 configured -- resuming normal operations
+[...] Server built: ...
+----
+====
+
+==== Using the Web Console
+
+. In the left navigation, click *Workloads* -> *Pods*.
++
+You will see one pod listed with a *Running* status and *1/1* in the Ready column, meaning the container inside the pod is healthy.
+
+image::console-guide/03-module-01-openshift-concepts/04-pods-list_with_arrows.png[Pods list showing the hello-world pod running]
+
+. Click the pod name to view its details. The Pod details page shows:
++
+* *Name*: the unique pod identifier (includes a random suffix)
+* *Namespace*: `{user}-lab-hello-world`
+* *Labels*: `app=hello-world` -- the label that connects this pod to the Service
+* *Status*: Running
+* *Pod IP*: the internal cluster IP assigned to this pod
+
+image::console-guide/03-module-01-openshift-concepts/05-pod-details_with_arrows.png[Pod details showing status, labels, and IP address]
+
+. Click the *Logs* tab to check the application logs.
++
+You will see the Apache httpd startup messages, confirming the web server is running inside the container. The console streams logs in real-time, so you can watch for new entries as requests come in.
+
+image::console-guide/03-module-01-openshift-concepts/06-pod-logs.png[Pod Logs tab showing Apache httpd startup messages]
+
+'''
+
+NOTE: Pods are ephemeral. They can be created, destroyed, and replaced at any time.
+A *Deployment* manages this lifecycle and ensures the right number of pods are always running.
+
+=== The Service: internal network access
+
+A *Service* gives your application a stable internal network address. Even if the Pod restarts and
+gets a new IP address, the Service address stays the same.
+
+==== Using the Terminal (CLI)
+
+Inspect the Service:
+
+[source,role="execute"]
+----
+oc get service hello-world
+----
+
+[%collapsible]
+.Expected output
+====
+----
+NAME          TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+hello-world   ClusterIP   172.x.x.x      <none>        8080/TCP   8m9s
+----
+====
+
+[source,role="execute"]
+----
+oc describe service hello-world
+----
+
+[%collapsible]
+.Expected output
+====
+----
+Name:              hello-world
+Selector:          app=hello-world
+Type:              ClusterIP
+Port:              http  8080/TCP
+Endpoints:         10.x.x.x:8080
+----
+====
+
+==== Using the Web Console
+
+. In the left navigation, click *Networking* -> *Services*, then click *hello-world*.
++
+The Service details page shows how internal networking works:
++
+* *Pod selector*: `app=hello-world` -- this label determines which pods receive traffic from this Service
+* *Service address*: A *Cluster IP* (accessible within the cluster only)
+* *Hostname*: The internal DNS name other applications can use to reach this service
+* *Service port mapping*: Port *8080/TCP* -- matching the container's listening port
+
+image::console-guide/03-module-01-openshift-concepts/08-service-details.png[Service details showing Pod selector, Cluster IP, and port mapping]
+
+'''
+
+Notice the `Selector` / `Pod selector` field: it uses a *label* (`app=hello-world`) to identify which pods the
+Service should route traffic to. This label-based selection is how OpenShift connects resources together.
+
+=== The Route: external access
+
+A *Route* exposes a Service to traffic from outside the cluster. It provides a public hostname and
+handles TLS termination so your users can access the app over HTTPS.
+
+==== Using the Terminal (CLI)
+
+Inspect the Route:
+
+[source,role="execute"]
+----
+oc get route hello-world
+----
+
+[%collapsible]
+.Expected output
+====
+----
+NAME          HOST/PORT                             PATH   SERVICES      PORT   TERMINATION     WILDCARD
+hello-world   hello-world-xxx.apps.example.com             hello-world   http   edge/Redirect   None
+----
+====
+
+[source,role="execute"]
+----
+oc describe route hello-world
+----
+
+[%collapsible]
+.Expected output (key fields)
+====
+----
+Name:           hello-world
+Namespace:      user-xxx-lab-hello-world
+Host:           hello-world-xxx.apps.example.com
+Path:           <none>
+TLS Termination: edge
+Insecure Policy: Redirect
+Service:        hello-world
+Port:           http
+----
+====
+
+Notice the `Host` field: that's the public URL you opened in your browser.
+Notice the `TLS` section: OpenShift handles the certificate automatically with edge termination.
+
+==== Using the Web Console
+
+. Navigate to *Networking* -> *Routes* and click on *hello-world*.
++
+The Route details page shows how external access works:
++
+* *Location*: The public URL users can access from anywhere on the internet
+* *Host*: The hostname that OpenShift generated automatically
+* *Service*: Links to the *hello-world* Service, which the Route forwards traffic to
+* *Target port*: `http` -- the named port on the Service
+* *Status*: *Accepted* -- the Route is active and serving traffic
+
+image::console-guide/03-module-01-openshift-concepts/09-route-details.png[Route details showing public URL, linked service, and target port]
+
+=== How they connect
+
+[mermaid]
+....
+flowchart LR
+    B["Browser"] -->|"HTTPS"| R["Route\n(public hostname + TLS)"]
+    R --> S["Service\n(stable internal IP)"]
+    S -->|"label selector"| P["Pod\n(running container)"]
+....
+
+The Route knows which Service to send traffic to.
+The Service knows which Pods to forward requests to (via labels).
+The Pod runs your container.
+
+== Section 3: Build it yourself (10 minutes)
+
+Now that you understand the pieces, let's build it from scratch.
+
+=== Switch to your clean project
+
+==== Using the Terminal (CLI)
+
+[source,role="execute",subs="attributes+"]
+----
+oc project {user}-lab
+----
+
+[%collapsible]
+.Expected output
+====
+[subs="attributes+"]
+----
+Now using project "{user}-lab" on server "{openshift_api_url}".
+----
+====
+
+Verify it's empty:
+
+[source,role="execute"]
+----
+oc get all
+----
+
+[%collapsible]
+.Expected output
+====
+[subs="attributes+"]
+----
+No resources found in {user}-lab namespace.
+----
+====
+
+==== Using the Web Console
+
+. Click the *Project* dropdown at the top of the page and select *{user}-lab*.
+. Navigate to *Workloads* -> *Deployments* to verify the project is empty. You should see *No Deployments found*.
+
+image::console-guide/03-module-01-openshift-concepts/10-empty-project_with_arrows.png[Empty Deployments page in the clean lab project]
+
+=== Step 3.1: Deploy the application
+
+==== Using the Terminal (CLI)
+
+Create a Deployment from a container image:
+
+[source,role="execute"]
+----
+oc create deployment hello-openshift \
+  --image=docker.io/openshift/hello-openshift
+----
+
+[%collapsible]
+.Expected output
+====
+----
+deployment.apps/hello-openshift created
+----
+====
+
+This creates a *Deployment* resource. OpenShift uses the Deployment to create and manage your Pod:
+if the Pod crashes, the Deployment automatically restarts it. The Service and Route are separate
+resources you'll add in the next steps.
+
+NOTE: You may also come across `oc new-app` in OpenShift documentation. It's a higher-level command
+that can auto-detect your source and create several resources at once. Here we use `oc create deployment`
+because it's explicit: you'll see exactly what gets created and why.
+
+Wait for the pod to come up:
+
+[source,role="execute"]
+----
+oc rollout status deployment/hello-openshift
+----
+
+[%collapsible]
+.Expected output
+====
+----
+deployment "hello-openshift" successfully rolled out
+----
+====
+
+NOTE: This same rollout process happens every time you deploy a new version of your application.
+OpenShift creates new Pods first, waits for them to be healthy, then scales down the old ones:
+no downtime, no manual coordination.
+
+==== Using the Web Console
+
+. On the Deployments page, click the *Create Deployment* button in the top right.
+
+. In the Create Deployment form:
++
+.. Enter `hello-openshift` in the *Name* field
++
+image::console-guide/03-module-01-openshift-concepts/11-create-deployment-name_with_arrows.png[Create Deployment form with name entered]
++
+.. Scroll down to the *Images* section
+.. Uncheck *Deploy image from an image stream tag*
+.. In the *Image Name* field, enter: `docker.io/openshift/hello-openshift`
++
+image::console-guide/03-module-01-openshift-concepts/12-create-deployment-image_with_arrows.png[Images section with container image name entered]
++
+.. Click *Create*
+
+You will be taken to the Deployment details page for `hello-openshift`. The pod ring shows your pods starting up.
+
+image::console-guide/03-module-01-openshift-concepts/13-deployment-created.png[Deployment details showing hello-openshift created successfully]
+
+This creates a *Deployment* resource. OpenShift uses the Deployment to create and manage your Pod:
+if the Pod crashes, the Deployment automatically restarts it.
+
+==== Verify
+
+===== Using the Terminal (CLI)
+
+[source,role="execute"]
+----
+oc get pods
+----
+
+[%collapsible]
+.Expected output
+====
+----
+NAME                               READY   STATUS    RESTARTS   AGE
+hello-openshift-6cc57fd754-lffwp   1/1     Running   0          25s
+----
+====
+
+* STATUS must be `Running`
+* READY must show `1/1`
+
+===== Using the Web Console
+
+Navigate to *Workloads* -> *Pods* to verify your pods are running.
+
+You should see your `hello-openshift` pods listed with:
+
+* *Status*: Running
+* *Ready*: 1/1
+
+image::console-guide/03-module-01-openshift-concepts/14-pods-running.png[Pods page showing hello-openshift pods running]
+
+=== Step 3.2: Expose the deployment as a Service
+
+The pod is running, but there's no stable internal address yet. You need to create a Service.
+
+==== Using the Terminal (CLI)
+
+[source,role="execute"]
+----
+oc expose deployment hello-openshift --port=8080
+----
+
+[%collapsible]
+.Expected output
+====
+----
+service/hello-openshift exposed
+----
+====
+
+Verify the Service was created:
+
+[source,role="execute"]
+----
+oc get service hello-openshift
+----
+
+[%collapsible]
+.Expected output
+====
+----
+NAME              TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+hello-openshift   ClusterIP   172.x.x.x      <none>        8080/TCP   5s
+----
+====
+
+==== Using the Web Console
+
+. In the left navigation menu, click *Networking* -> *Services*.
++
+You'll see an empty list since no Services exist yet in this project.
+
+. Click the *Create Service* button, or navigate to the *Import YAML* page using the *+* icon in the top navigation bar.
+
+. In the YAML editor, replace any existing content with the following Service definition:
++
+[source,yaml,subs="attributes+"]
+----
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-openshift
+  namespace: {user}-lab
+spec:
+  selector:
+    app: hello-openshift
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+----
+
+. Click *Create*.
+
+The Service details page shows your new `hello-openshift` Service with:
+
+* *Pod selector*: `app=hello-openshift` -- this label matches the pods created by your Deployment
+* *Type*: ClusterIP -- a stable internal address
+* *Service port mapping*: port 8080/TCP forwarding to pod port 8080
+
+image::console-guide/03-module-01-openshift-concepts/18-service-created-details.png[Service details page showing hello-openshift Service]
+
+'''
+
+The `ClusterIP` is the stable internal address. Other applications inside the cluster can reach
+your app at this address, but it's not yet accessible from outside.
+
+=== Step 3.3: Create a Route for external access
+
+==== Using the Terminal (CLI)
+
+Expose the Service with a Route:
+
+[source,role="execute"]
+----
+oc expose service hello-openshift
+----
+
+[%collapsible]
+.Expected output
+====
+----
+route.route.openshift.io/hello-openshift exposed
+----
+====
+
+Verify the Route:
+
+[source,role="execute"]
+----
+oc get route hello-openshift
+----
+
+[%collapsible]
+.Expected output
+====
+----
+NAME              HOST/PORT                                    PATH   SERVICES          PORT   TERMINATION   WILDCARD
+hello-openshift   hello-openshift-xxx-lab.apps.example.com           hello-openshift   8080                 None
+----
+====
+
+Test it with `curl`:
+
+[source,role="execute"]
+----
+curl -s http://$(oc get route hello-openshift -o jsonpath='{.spec.host}')
+----
+
+[%collapsible]
+.Expected output
+====
+----
+Hello OpenShift!
+----
+====
+
+==== Using the Web Console
+
+. In the left navigation menu, click *Networking* -> *Routes*.
++
+You'll see an empty list since no Routes exist yet.
++
+image::console-guide/03-module-01-openshift-concepts/19-routes-empty_with_arrows.png[Routes page showing no routes]
+
+. Click the *Create Route* button.
+
+. The YAML editor opens with a default Route template. Replace the content with the following Route definition:
++
+[source,yaml,subs="attributes+"]
+----
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: hello-openshift
+  namespace: {user}-lab
+spec:
+  to:
+    kind: Service
+    name: hello-openshift
+  port:
+    targetPort: 8080
+----
+
+. Click *Create*.
+
+The Route details page confirms your Route is active:
+
+* *Status*: Accepted
+* *Location*: a public URL for your application
+* *Service*: hello-openshift
+* *Target port*: 8080
+
+image::console-guide/03-module-01-openshift-concepts/21-route-created-details.png[Route details page showing hello-openshift Route with public URL]
+
+===== Verify
+
+Click the *Location* link on the Route details page to open the application URL in your browser.
+
+You should see the `Hello OpenShift!` message, confirming your application is publicly accessible.
+
+image::console-guide/03-module-01-openshift-concepts/22-hello-openshift-app.png[Hello OpenShift application running in the browser]
+
+'''
+
+And that's it. You just deployed your first OpenShift application: a running, publicly accessible
+web app, built from scratch using either CLI commands or the web console. That's the same workflow
+you'd use for any containerized application on OpenShift.
+
+== Module summary
+
+You've deployed a complete, publicly accessible web application on OpenShift.
+
+*What you accomplished:*
+
+* Explored a pre-deployed application and identified its Pods, Service, and Route
+* Understood how the 3 core resources connect to serve external traffic
+* Deployed a container image to OpenShift using either `oc create deployment` or the web console
+* Created a Service to give your app a stable internal network address
+* Created a Route to expose your app to the internet with HTTPS
+
+*Key concepts:*
+
+* *Pod*: the running container; ephemeral and managed by a Deployment
+* *Service*: stable internal network address; uses label selectors to find pods
+* *Route*: external access with a public hostname and TLS termination
+* *Labels*: key/value metadata that connects resources together
+
+*Next steps:*
+
+Future labs will take you further: deploying a full three-tier application (frontend, backend, database)
+using multiple OpenShift deployment methods.

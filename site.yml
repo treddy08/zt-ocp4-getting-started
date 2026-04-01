@@ -12,8 +12,8 @@ ui:
   bundle:
     url: https://github.com/rhpds/rhdp_showroom_theme/releases/download/rh-summit-2025/ui-bundle.zip
     snapshot: true
-  # supplemental_files:          # TODO: copy supplemental-ui/ from showroom_template_nookbag
-  #   - path: ./content/supplemental-ui
+  supplemental_files:
+    - path: ./content/supplemental-ui
 
 antora:
   extensions:
@@ -24,21 +24,24 @@ asciidoc:
     experimental: true
     page-pagination: true
     # Runtime-injected by ocp4_workload_showroom at deploy time
-    openshift_console_url: https://console-openshift-console.apps.cluster.example.com
-    openshift_cluster_ingress_domain: apps.cluster.example.com
-    openshift_api_url: https://api.cluster.example.com:6443
-    user: user1
-    password: openshift
-    login_command: "oc login --insecure-skip-tls-verify=false -u user1 -p openshift https://api.cluster.example.com:6443"
-    gitea_console_url: https://gitea.apps.cluster.example.com
-    gitea_user: user1
-    gitea_password: openshift
-    # Workshop-specific attributes
-    user_project: wksp-user1
+    # openshift_console_url: https://console-openshift-console.apps.cluster.example.com
+    # openshift_cluster_ingress_domain: apps.cluster.example.com
+    # openshift_api_url: https://api.cluster.example.com:6443
+    # user: user1-placeholder
+    # password: openshift-placeholder
+    # login_command: "oc login --insecure-skip-tls-verify=false -u user1-placeholder -p openshift https://api.cluster.example.com:6443"
+    # gitea_console_url: https://gitea.apps.cluster.example.com
+    # gitea_user: user1-placeholder
+    # gitea_password: openshift-placeholder
+    # # Workshop-specific attributes
+    # user_project: wksp-user1-placeholder
     ocp4_cli_version: 4.20.x
     parksmap_image: quay.io/openshiftroadshow/parksmap:latest
     openshift_docs_url: https://docs.redhat.com/en/documentation/openshift_container_platform/4.20
     openshift_roadshow_url: https://github.com/openshift-roadshow
+
+runtime:
+  fetch: true
 
 output:
   dir: ./www

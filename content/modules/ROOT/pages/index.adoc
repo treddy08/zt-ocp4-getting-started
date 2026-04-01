@@ -1,42 +1,11 @@
-= Welcome to the OpenShift Getting Started Workshop
-:navtitle: Overview
+= OpenShift Getting Started
 
-== Overview
+Welcome to the *OpenShift Getting Started* lab series.
 
-This workshop provides a hands-on introduction to OpenShift from a developer's perspective. Through practical, interactive exercises, you'll learn how to build, deploy, and manage containerized applications on the OpenShift platform.
+These labs are designed for developers, platform engineers, and DevOps engineers who are new to OpenShift.
+Each lab is hands-on and self-contained: you'll work directly on a live OpenShift cluster.
 
-== What You'll Learn
+== Labs in this series
 
-*Getting Started with OpenShift:*
-
-* Use the OpenShift command line client and web console
-* Navigate the OpenShift developer interface and understand key concepts
-
-*Application Deployment and Management:*
-
-* Deploy applications using pre-existing container images
-* Deploy applications directly from source code in Git repositories
-* Work with application labels to identify and organize components
-* Scale applications to handle varying traffic loads
-
-*Networking and Access:*
-
-* Expose applications to external users through routes
-* Configure application networking and service discovery
-
-*Monitoring and Troubleshooting:*
-
-* View and analyze application logs for debugging
-* Access application containers for direct interaction and troubleshooting
-
-*Database Integration:*
-
-* Deploy databases from the OpenShift service catalog
-* Configure applications to connect to and use databases
-
-*Collaboration and Automation:*
-
-* Grant access to other users for collaborative development
-* Set up webhooks to enable automated application builds from code changes
-
-NOTE: While this workshop uses Java applications, the concepts and techniques apply to applications built with .NET, Node.js, Python, and other runtimes.
+* xref:03-module-01-openshift-concepts.adoc[Module 1: OpenShift Concepts -- Your First Pod] +
+  Deploy a containerized application and learn the core building blocks: Pods, Services, and Routes.
