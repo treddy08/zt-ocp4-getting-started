@@ -1,6 +1,6 @@
 ---
 site:
-  title: OCP4 Getting Started Workshop
+  title: Getting Started with OpenShift
   start_page: modules::index.adoc
 
 content:

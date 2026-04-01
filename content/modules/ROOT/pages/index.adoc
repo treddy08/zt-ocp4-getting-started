@@ -7,5 +7,5 @@ Each lab is hands-on and self-contained: you'll work directly on a live OpenShif
 
 == Labs in this series
 
-* xref:03-module-01-openshift-concepts.adoc[Module 1: OpenShift Concepts -- Your First Pod] +
+* xref:lab-01-openshift-concepts.adoc[Module 1: OpenShift Concepts -- Your First Pod] +
   Deploy a containerized application and learn the core building blocks: Pods, Services, and Routes.
