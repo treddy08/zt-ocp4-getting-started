@@ -16,5 +16,7 @@ tabs:
     port: 443
   - name: OCP Console
     url: 'https://console-openshift-console.${DOMAIN}'
+  - name: Client App
+    url: 'https://datasphere-ui-${USER}-datasphere.${DOMAIN}'
   - name: Gitea
     url: 'https://gitea.${DOMAIN}'
