@@ -1,17 +1,16 @@
-= Module 1: OpenShift Concepts -- Your First Pod (Web Console)
+= Module 1: Your First Application (Web Console)
 :source-highlighter: rouge
 :toc: macro
 :toclevels: 2
 
-Your team at CloudCo is ready to start building. The application is containerized and the OpenShift
-cluster is running. All that's standing between your team and a working development environment is
-a deployment.
+In this module, you'll deploy the DataSphere frontend on OpenShift and learn the 3 building
+blocks that make every OpenShift application work: *Pods*, *Services*, and *Routes*.
 
-In this module, you'll first see the finished result: a running, publicly accessible application.
-Then tear it down and rebuild it from scratch using the web console.
+First you'll see the finished result — the full DataSphere application already running, live map
+and all. Then you'll explore what OpenShift created to make it work. Finally, you'll deploy
+the frontend yourself from scratch using the web console.
 
-By the end, you'll understand the 3 core building blocks that make every OpenShift application work:
-*Pods*, *Services*, and *Routes*.
+By the end, the map will be empty. That's intentional. Lab 2 picks up here.
 
 toc::[]
 
@@ -37,52 +36,70 @@ Log in with these credentials:
 * *Password*: `{password}`
 * *Console URL*: {openshift_console_url}
 
+=== Your lab Projects
+
+3 Projects have been provisioned for you:
+
+* `{user}-datasphere`: contains the pre-deployed DataSphere application — explore it in Sections 1 and 2
+* `{user}-lab`: your clean workspace — you'll build here in Section 3
+* `{user}-lab-helm`: reserved for the Helm deployment exercise in Lab 2
+
+NOTE: In OpenShift, a Project is equivalent to a Kubernetes namespace. It scopes your resources and controls access.
+
 == Section 1: The Existing Deployment (3 minutes)
 
-A Hello World application is already running in your `{user}-lab-hello-world` namespace.
+The full DataSphere application is already running in your `{user}-datasphere` Project.
 It was deployed automatically when your lab environment was provisioned.
 Before you build anything, let's see what the finished result looks like.
 
-=== Step 1.1: Switch to your pre-deployed namespace
+=== Step 1.1: Switch to your pre-deployed Project
 
 . In the left navigation, click *Home* -> *Projects*.
 +
-You will see two projects listed:
+You will see three projects listed:
 +
+* `{user}-datasphere`: contains the pre-deployed DataSphere application
 * `{user}-lab`: your clean workspace for building from scratch
-* `{user}-lab-hello-world`: contains the pre-deployed application
+* `{user}-lab-helm`: reserved for the Helm exercise in Lab 2
 
-. Click on *{user}-lab-hello-world* to open the project overview.
+. Click on *{user}-datasphere* to open the project overview.
 
-image::console-guide/03-module-01-openshift-concepts/01-projects-list_with_arrows.png[Projects page showing your two lab projects]
+image::console-guide/lab-01-01-projects-list.png[Projects page showing all three provisioned projects]
 
 === Step 1.2: See what's running
 
 . In the left navigation, click *Workloads* -> *Deployments*.
 +
-You will see the *hello-world* deployment listed with *1 of 1 pods* running. Notice the labels column showing `app=hello-world` -- this label is how OpenShift connects resources together.
+You will see 2 deployments listed, both with *1 of 1 pods* running:
++
+* `datasphere-ui` — the React frontend
+* `datasphere-api` — the Python backend API
 
-image::console-guide/03-module-01-openshift-concepts/02-deployments-list.png[Deployments page showing hello-world with 1 of 1 pods]
+image::console-guide/lab-01-02-deployments-list.png[Deployments page showing both datasphere-ui and datasphere-api with 1 of 1 pods running]
 
 === Step 1.3: Get the application URL
 
 . In the left navigation, click *Networking* -> *Routes*.
 +
-You will see the *hello-world* Route with its public URL in the *Location* column. The status shows *Accepted*, meaning the Route is active and serving traffic.
+You will see 1 Route: *datasphere-ui*. Notice that `datasphere-api` has no Route — it is
+internal only. We'll come back to why in Section 2.
 
-. Click the URL in the Location column to open the application in your browser. You will see a welcome message -- that's your pre-deployed application running on OpenShift.
+. Click the URL in the *Location* column to open the application in your browser.
++
+You'll see a live map of global datacenter sites with capacity and status data.
+Click a site to toggle its status and watch the map respond in real time.
 
-image::console-guide/03-module-01-openshift-concepts/03-routes-list_with_arrows.png[Routes page showing hello-world route with public URL]
+image::console-guide/lab-01-03-routes-list.png[Routes page showing datasphere-ui route — no Route for datasphere-api]
 
-That's a fully configured containerized web application, running on OpenShift, accessible
-from anywhere on the internet.
+That's a 2-tier application — a React frontend backed by a Python API — running on OpenShift,
+accessible from anywhere on the internet.
 
 Now let's understand what made that possible.
 
 == Section 2: Explore the pieces (5 minutes)
 
-Every application on OpenShift is made up of the same 3 core resources.
-Let's inspect each one and understand what it does.
+Every application on OpenShift is built from the same 3 core resources.
+Let's inspect each one using the `datasphere-ui` component.
 
 === The Pod: where your application runs
 
@@ -91,25 +108,28 @@ a shared network and storage context.
 
 . In the left navigation, click *Workloads* -> *Pods*.
 +
-You will see one pod listed with a *Running* status and *1/1* in the Ready column, meaning the container inside the pod is healthy.
+You will see 2 pods listed, both with *Running* status and *1/1* in the Ready column.
 
-image::console-guide/03-module-01-openshift-concepts/04-pods-list_with_arrows.png[Pods list showing the hello-world pod running]
+image::console-guide/lab-01-04-pods-list.png[Pods list showing both datasphere-ui and datasphere-api pods Running with 1/1 Ready]
 
-. Click the pod name to view its details. The Pod details page shows:
+. Click the `datasphere-ui-` pod (the one with the longer random suffix) to view its details.
++
+The Pod details page shows:
 +
 * *Name*: the unique pod identifier (includes a random suffix)
-* *Namespace*: `{user}-lab-hello-world`
-* *Labels*: `app=hello-world` -- the label that connects this pod to the Service
+* *Namespace*: `{user}-datasphere`
+* *Labels*: `app=datasphere,component=ui` — the labels that connect this pod to its Service
 * *Status*: Running
 * *Pod IP*: the internal cluster IP assigned to this pod
+* *Container image*: `{datasphere_ui_image}`
 
-image::console-guide/03-module-01-openshift-concepts/05-pod-details_with_arrows.png[Pod details showing status, labels, and IP address]
+image::console-guide/lab-01-05-pod-details.png[Pod details page showing status Running, labels app=datasphere component=ui, and container image]
 
 . Click the *Logs* tab to check the application logs.
 +
-You will see the Apache httpd startup messages, confirming the web server is running inside the container. The console streams logs in real-time, so you can watch for new entries as requests come in.
+You will see nginx access log entries, confirming the web server is running inside the container.
 
-image::console-guide/03-module-01-openshift-concepts/06-pod-logs.png[Pod Logs tab showing Apache httpd startup messages]
+image::console-guide/lab-01-06-pod-logs.png[Pod Logs tab showing the container log viewer]
 
 NOTE: Pods are ephemeral. They can be created, destroyed, and replaced at any time.
 A *Deployment* manages this lifecycle and ensures the right number of pods are always running.
@@ -119,61 +139,77 @@ A *Deployment* manages this lifecycle and ensures the right number of pods are a
 A *Service* gives your application a stable internal network address. Even if the Pod restarts and
 gets a new IP address, the Service address stays the same.
 
-. In the left navigation, click *Networking* -> *Services*, then click *hello-world*.
+. In the left navigation, click *Networking* -> *Services*, then click *datasphere-ui*.
 +
 The Service details page shows how internal networking works:
 +
-* *Pod selector*: `app=hello-world` -- this label determines which pods receive traffic from this Service
+* *Pod selector*: `app=datasphere,component=ui` — this label determines which pods receive traffic from this Service
 * *Service address*: A *Cluster IP* (accessible within the cluster only)
 * *Hostname*: The internal DNS name other applications can use to reach this service
-* *Service port mapping*: Port *8080/TCP* -- matching the container's listening port
+* *Service port mapping*: Port *8080/TCP* — matching the container's listening port
 
-image::console-guide/03-module-01-openshift-concepts/08-service-details.png[Service details showing Pod selector, Cluster IP, and port mapping]
+image::console-guide/lab-01-07-service-details.png[Service details for datasphere-ui showing Pod selector, Cluster IP, and port 8080 mapping]
 
-Notice the `Pod selector` field: it uses a *label* (`app=hello-world`) to identify which pods the
-Service should route traffic to. This label-based selection is how OpenShift connects resources together.
+Notice the `Pod selector` field: it uses *labels* to identify which pods the Service should route
+traffic to. This label-based selection is how OpenShift connects resources together.
 
 === The Route: external access
 
 A *Route* exposes a Service to traffic from outside the cluster. It provides a public hostname and
 handles TLS termination so your users can access the app over HTTPS.
 
-. Navigate to *Networking* -> *Routes* and click on *hello-world*.
+. Navigate to *Networking* -> *Routes* and click on *datasphere-ui*.
 +
 The Route details page shows how external access works:
 +
 * *Location*: The public URL users can access from anywhere on the internet
 * *Host*: The hostname that OpenShift generated automatically
-* *Service*: Links to the *hello-world* Service, which the Route forwards traffic to
-* *Target port*: `http` -- the named port on the Service
-* *Status*: *Accepted* -- the Route is active and serving traffic
+* *Service*: Links to the *datasphere-ui* Service, which the Route forwards traffic to
+* *Target port*: `8080`
+* *TLS*: Edge termination with redirect — OpenShift handles the certificate automatically
+* *Status*: *Accepted* — the Route is active and serving traffic
 
-image::console-guide/03-module-01-openshift-concepts/09-route-details.png[Route details showing public URL, linked service, and target port]
+image::console-guide/lab-01-08-route-details.png[Route details showing public URL, datasphere-ui service link, and TLS edge termination]
+
+=== Why datasphere-api has no Route
+
+Go back to *Networking* -> *Routes*. There is only 1 Route — for `datasphere-ui`.
+`datasphere-api` has no Route. That's deliberate: the API only needs to be reachable from within
+the cluster, not from the internet.
+
+Navigate to *Networking* -> *Services*. You'll see Services for both `datasphere-ui` and
+`datasphere-api`. The UI talks to the API by Service name — `datasphere-api` — and OpenShift's
+internal DNS resolves it automatically. No Route needed.
 
 === How they connect
 
 [mermaid]
 ....
-flowchart LR
-    B["Browser"] -->|"HTTPS"| R["Route\n(public hostname + TLS)"]
-    R --> S["Service\n(stable internal IP)"]
-    S -->|"label selector"| P["Pod\n(running container)"]
+flowchart TB
+    B["🌐 Browser"]
+    R["Route\n(datasphere-ui)"]
+    S["Service\n(stable internal IP)"]
+    P["Pod\n(running container)"]
+
+    B -->|"HTTPS"| R
+    R --> S
+    S -->|"label selector"| P
 ....
 
 The Route knows which Service to send traffic to.
-The Service knows which Pods to forward requests to (via labels).
+The Service knows which Pods to forward requests to via label selectors.
 The Pod runs your container.
 
-== Section 3: Build it yourself (10 minutes)
+== Section 3: Build it yourself (8 minutes)
 
-Now that you understand the pieces, let's build it from scratch.
+Now that you understand the pieces, let's build the frontend from scratch.
 
-=== Switch to your clean project
+=== Switch to your clean Project
 
 . Click the *Project* dropdown at the top of the page and select *{user}-lab*.
 . Navigate to *Workloads* -> *Deployments* to verify the project is empty. You should see *No Deployments found*.
 
-image::console-guide/03-module-01-openshift-concepts/10-empty-project_with_arrows.png[Empty Deployments page in the clean lab project]
+image::console-guide/lab-01-09-empty-project.png[Empty Deployments page in the clean lab project showing No Deployments found]
 
 === Step 3.1: Deploy the application
 
@@ -181,58 +217,55 @@ image::console-guide/03-module-01-openshift-concepts/10-empty-project_with_arrow
 
 . In the Create Deployment form:
 +
-.. Enter `hello-openshift` in the *Name* field
+.. Enter `datasphere-ui` in the *Name* field
 +
-image::console-guide/03-module-01-openshift-concepts/11-create-deployment-name_with_arrows.png[Create Deployment form with name entered]
+image::console-guide/lab-01-10-create-deployment-name.png[Create Deployment form with datasphere-ui entered in the Name field]
 +
 .. Scroll down to the *Images* section
 .. Uncheck *Deploy image from an image stream tag*
-.. In the *Image Name* field, enter: `docker.io/openshift/hello-openshift`
+.. In the *Image Name* field, enter: `{datasphere_ui_image}`
 +
-image::console-guide/03-module-01-openshift-concepts/12-create-deployment-image_with_arrows.png[Images section with container image name entered]
+image::console-guide/lab-01-11-create-deployment-image.png[Images section with Deploy image from an image stream tag unchecked and container image name entered]
 +
 .. Click *Create*
 
-You will be taken to the Deployment details page for `hello-openshift`. The pod ring shows your pods starting up.
+You will be taken to the Deployment details page for `datasphere-ui`. The pod ring shows your pod starting up.
 
-image::console-guide/03-module-01-openshift-concepts/13-deployment-created.png[Deployment details showing hello-openshift created successfully]
+image::console-guide/lab-01-12-deployment-created.png[Deployment details page showing datasphere-ui created with pod ring starting up]
 
 This creates a *Deployment* resource. OpenShift uses the Deployment to create and manage your Pod:
 if the Pod crashes, the Deployment automatically restarts it.
 
 ==== Verify
 
-Navigate to *Workloads* -> *Pods* to verify your pods are running.
+Navigate to *Workloads* -> *Pods* to verify your pod is running.
 
-You should see your `hello-openshift` pods listed with:
+You should see your `datasphere-ui` pod listed with:
 
 * *Status*: Running
 * *Ready*: 1/1
 
-image::console-guide/03-module-01-openshift-concepts/14-pods-running.png[Pods page showing hello-openshift pods running]
+image::console-guide/lab-01-13-pods-running.png[Pods page showing datasphere-ui pod with Running status and 1/1 Ready]
 
-=== Step 3.2: Expose the deployment as a Service
+=== Step 3.2: Verify the Service
 
-The pod is running, but there's no stable internal address yet. You need to create a Service.
+`oc new-app` creates a Service automatically. In the console, "Create Deployment" does not —
+you need to create one explicitly. Let's do that now using the YAML editor.
 
-. In the left navigation menu, click *Networking* -> *Services*.
-+
-You'll see an empty list since no Services exist yet in this project.
+. Click the *+* icon in the top navigation bar to open *Import YAML*.
 
-. Click the *Create Service* button, or navigate to the *Import YAML* page using the *+* icon in the top navigation bar.
-
-. In the YAML editor, replace any existing content with the following Service definition:
+. Replace any existing content with the following Service definition:
 +
 [source,yaml,subs="attributes+"]
 ----
 apiVersion: v1
 kind: Service
 metadata:
-  name: hello-openshift
+  name: datasphere-ui
   namespace: {user}-lab
 spec:
   selector:
-    app: hello-openshift
+    app: datasphere-ui
   ports:
     - protocol: TCP
       port: 8080
@@ -241,45 +274,50 @@ spec:
 
 . Click *Create*.
 
-The Service details page shows your new `hello-openshift` Service with:
+The Service details page shows your new `datasphere-ui` Service with:
 
-* *Pod selector*: `app=hello-openshift` -- this label matches the pods created by your Deployment
-* *Type*: ClusterIP -- a stable internal address
+* *Pod selector*: `app=datasphere-ui` — this label matches the pods created by your Deployment
+* *Type*: ClusterIP — a stable internal address
 * *Service port mapping*: port 8080/TCP forwarding to pod port 8080
 
-image::console-guide/03-module-01-openshift-concepts/18-service-created-details.png[Service details page showing hello-openshift Service]
+image::console-guide/lab-01-14-service-details.png[Service details for datasphere-ui showing Pod selector, ClusterIP, and port 8080 mapping]
 
 The `ClusterIP` is the stable internal address. Other applications inside the cluster can reach
 your app at this address, but it's not yet accessible from outside.
 
 === Step 3.3: Create a Route for external access
 
-Expose the Service with a Route:
-
-. In the left navigation menu, click *Networking* -> *Routes*.
+. In the left navigation, click *Networking* -> *Routes*.
 +
 You'll see an empty list since no Routes exist yet.
 +
-image::console-guide/03-module-01-openshift-concepts/19-routes-empty_with_arrows.png[Routes page showing no routes]
+image::console-guide/lab-01-15-routes-empty.png[Routes page showing no routes — empty list before creating the Route]
 
 . Click the *Create Route* button.
++
+The console opens a YAML editor pre-populated with a Route template.
 
-. The YAML editor opens with a default Route template. Replace the content with the following Route definition:
+. Replace the contents with the following Route definition:
 +
 [source,yaml,subs="attributes+"]
 ----
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: hello-openshift
+  name: datasphere-ui
   namespace: {user}-lab
 spec:
   to:
     kind: Service
-    name: hello-openshift
+    name: datasphere-ui
   port:
     targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
 ----
++
+image::console-guide/lab-01-16-create-route-yaml.png[YAML editor showing the datasphere-ui Route definition]
 
 . Click *Create*.
 
@@ -287,43 +325,48 @@ The Route details page confirms your Route is active:
 
 * *Status*: Accepted
 * *Location*: a public URL for your application
-* *Service*: hello-openshift
-* *Target port*: 8080
+* *Service*: datasphere-ui
 
-image::console-guide/03-module-01-openshift-concepts/21-route-created-details.png[Route details page showing hello-openshift Route with public URL]
+image::console-guide/lab-01-17-route-details.png[Route details page showing datasphere-ui Route with public URL, Accepted status, and TLS edge termination]
 
 ==== Verify
 
 Click the *Location* link on the Route details page to open the application URL in your browser.
 
-You should see the `Hello OpenShift!` message, confirming your application is publicly accessible.
+The DataSphere UI loads — but the map is empty. No datacenter sites, no status data.
 
-image::console-guide/03-module-01-openshift-concepts/22-hello-openshift-app.png[Hello OpenShift application running in the browser]
+That's not a bug. The UI is running exactly as it should: it's already calling out to
+`datasphere-api:8080`, looking for the backend. But there's no pod answering that address yet.
+You've deployed the frontend. The backend doesn't exist in this Project.
 
-And that's it. You just deployed your first OpenShift application entirely through the web console:
-a running, publicly accessible web app, built from scratch. That's the same workflow you'd use for
-any containerized application on OpenShift.
+In Lab 2, you'll add the API using *Source-to-Image* — OpenShift will build it directly from
+source code — and the moment it comes online, the map will populate automatically. No changes
+to the UI required.
+
+image::console-guide/lab-01-18-datasphere-empty-map.png[DataSphere UI loaded in the browser showing an empty map with no datacenter sites]
 
 == Module summary
 
-You've deployed a complete, publicly accessible web application on OpenShift using the web console.
+You've deployed the frontend tier of a real 2-tier application on OpenShift using the web console.
 
 *What you accomplished:*
 
-* Explored a pre-deployed application and identified its Pods, Service, and Route
+* Explored a pre-deployed application and identified its Pods, Services, and Routes
 * Understood how the 3 core resources connect to serve external traffic
+* Understood why some components have Routes and others don't
 * Deployed a container image to OpenShift using the Create Deployment form
 * Created a Service to give your app a stable internal network address
-* Created a Route to expose your app to the internet
+* Created a Route to expose your app to the internet with automatic HTTPS
 
 *Key concepts:*
 
 * *Pod*: the running container; ephemeral and managed by a Deployment
 * *Service*: stable internal network address; uses label selectors to find pods
-* *Route*: external access with a public hostname and TLS termination
+* *Route*: external access with a public hostname and automatic TLS termination
 * *Labels*: key/value metadata that connects resources together
 
 *Next steps:*
 
-Future labs will take you further: deploying a full three-tier application (frontend, backend, database)
-using multiple OpenShift deployment methods.
+The frontend is running but the map is empty. Lab 2 adds the backend using Source-to-Image,
+then shows how to deploy the complete 2-tier application as a single Helm chart.
+If you already know Pods, Services, and Routes, you can start Lab 2 directly.

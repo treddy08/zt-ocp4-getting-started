@@ -59,6 +59,7 @@ You have access to the following projects and can switch between them with 'oc p
 
   * {user}-datasphere
     {user}-lab
+    {user}-lab-helm
 
 Using project "{user}-datasphere".
 ----
@@ -66,10 +67,11 @@ Using project "{user}-datasphere".
 
 === Your lab Projects
 
-2 Projects have been provisioned for you:
+3 Projects have been provisioned for you:
 
 * `{user}-datasphere`: contains a pre-deployed DataSphere application used in Sections 1 and 2
 * `{user}-lab`: your clean workspace for Section 3
+* `{user}-lab-helm`: pre-provisioned for the Helm deployment exercise in Section 4
 
 NOTE: In OpenShift, a Project is equivalent to a Kubernetes namespace. It scopes your resources and controls access.
 
@@ -88,10 +90,10 @@ In the web console, click the *Project* dropdown at the top of the page and sele
 
 In the left navigation, click *Topology*.
 
-You'll see 2 components connected by a line: `datasphere-ui` and `datasphere-api`.
-The arrow between them represents the network connection from the UI to the API.
+You'll see 2 components: `datasphere-ui` and `datasphere-api`.
+Each node represents a running deployment in this project.
 
-//TODO: add screenshot of Topology view showing both components
+image::console-guide/lab-02-02-topology-datasphere.png[Topology view showing datasphere-ui and datasphere-api components in the datasphere project]
 
 === Step 1.3: Open the application
 
@@ -99,6 +101,8 @@ Click the *open URL* icon (the small arrow box) on the `datasphere-ui` component
 
 You'll see a live map of global datacenter sites with capacity and status data.
 Click a site to toggle its status and watch the map respond.
+
+image::console-guide/lab-02-01-datasphere-map-live.png[DataSphere UI showing the live map with all global datacenter sites populated and healthy]
 
 That's a 2-tier application — a React frontend backed by a Python REST API — running on OpenShift
 and accessible from anywhere on the internet.
@@ -112,21 +116,22 @@ Now let's understand how it works.
 In the Topology view, click the `datasphere-ui` component to open its side panel.
 Click *Actions* → *Edit Deployment* to see its configuration.
 
-Under *Container*, note the image: `quay.io/nstephan/datasphere-ui:1.0.2`.
+Under *Container*, note the image: `{datasphere_ui_image}`.
 
 The image is pulled from a container registry and run directly.
 No source code was compiled. No build was needed.
 
-//TODO: add screenshot of the datasphere-ui deployment detail panel showing the image
+image::console-guide/lab-02-03-datasphere-ui-image.png[datasphere-ui Deployment edit view showing the container image field]
 
 === The backend: datasphere-api
 
 Click the `datasphere-api` component in the Topology view.
 
-Under *Container*, note the image: `quay.io/nstephan/datasphere-api:1.0.0`.
+The API image was built from source code using Source-to-Image at provisioning time and pushed
+to the cluster's internal registry.
+In Section 3, you will build it yourself the same way.
 
-In this pre-deployed version, the API runs from a pre-built image.
-In Section 3, you will build it from source code instead.
+image::console-guide/lab-02-05-datasphere-api-side-panel.png[datasphere-api side panel showing the component with no Routes]
 
 === How they connect
 
@@ -137,6 +142,8 @@ In the left navigation, click *Project* → *Services*. Notice that `datasphere-
 no Route: it's only reachable from within the cluster.
 The UI talks to it by Service name. OpenShift's internal DNS resolves that name to the correct
 pod automatically, even as pods restart and change IP addresses.
+
+image::console-guide/lab-02-06-services-list.png[Services list showing both datasphere-ui and datasphere-api Services — no Route for datasphere-api]
 
 [mermaid]
 ....
@@ -160,25 +167,25 @@ Click *+Add* in the left navigation (or the prompt in the Topology canvas).
 
 Select *Container images*.
 
-//TODO: add screenshot of the +Add menu
+image::console-guide/lab-02-04-add-menu.png[Developer perspective +Add menu showing deployment options]
 
 Fill in the form:
 
-* *Image name from external registry*: `quay.io/nstephan/datasphere-ui:1.0.2`
+* *Image name from external registry*: `{datasphere_ui_image}`
 * Wait for the image to be validated (a green checkmark appears)
 * *Application name*: `datasphere`
 * *Name*: `datasphere-ui`
 * Under *Resource type*, select *Deployment*
 * Under *Advanced options*, make sure *Create a route to the Application* is checked
 
-//TODO: add screenshot of the Container images form filled in
+image::console-guide/lab-02-07-deploy-image-form.png[Container images form filled in with datasphere-ui image, application name datasphere, and route option checked]
 
 Click *Create*.
 
 You'll be returned to the Topology view. A new `datasphere-ui` component appears with a
 spinning build indicator. Wait until the indicator turns solid (pod is Running).
 
-//TODO: add screenshot of Topology showing datasphere-ui deploying
+image::console-guide/lab-02-08-topology-datasphere-ui-deployed.png[Topology view showing datasphere-ui component deployed and running]
 
 Click the *open URL* icon on `datasphere-ui` to open it in your browser.
 
@@ -189,11 +196,11 @@ That's expected — you'll fix that in the next step.
 
 Click *+Add* and select *Import from Git*.
 
-//TODO: add screenshot of Import from Git form
+image::console-guide/lab-02-09-import-from-git-form.png[Import from Git form showing the Git Repo URL field]
 
 Fill in the form:
 
-* *Git Repo URL*: `{datasphere_api_repo}`
+* *Git Repo URL*: `{gitea_url}/{user}/datasphere-api`
 * Wait for the repository to be validated
 * OpenShift auto-detects the Python language and selects the *Python* builder image
 
@@ -208,7 +215,7 @@ Scroll down and set:
 
 The API only needs to be reachable from within the cluster — it doesn't need a public URL.
 
-//TODO: add screenshot of the form with datasphere-api configuration
+image::console-guide/lab-02-10-import-git-python-builder.png[Import from Git form showing Python builder auto-selected, datasphere-api name, and no Route option]
 
 Click *Create*.
 
@@ -249,11 +256,11 @@ Helm lets you package all of those resources into a single installable unit.
 
 This section uses the terminal. Click the *Terminal* tab on the right side of this lab interface.
 
-Create a new Project:
+Switch to your pre-provisioned Helm Project and install the DataSphere chart:
 
 [source,role="execute",subs="attributes+"]
 ----
-oc new-project {user}-datasphere-helm
+oc project {user}-lab-helm && helm install datasphere {gitea_url}/api/packages/gitea-admin/helm/datasphere-{datasphere_helm_version}.tgz
 ----
 
 [%collapsible]
@@ -261,29 +268,11 @@ oc new-project {user}-datasphere-helm
 ====
 [subs="attributes+"]
 ----
-Now using project "{user}-datasphere-helm" on server "{openshift_api_url}".
-----
-====
-
-The DataSphere Helm chart is pre-staged in your home directory. Install it:
-
-[source,role="execute"]
-----
-helm install datasphere ~/datasphere-gitops
-----
-
-[%collapsible]
-.Expected output
-====
-----
 NAME: datasphere
 LAST DEPLOYED: ...
-NAMESPACE: {user}-datasphere-helm
+NAMESPACE: {user}-lab-helm
 STATUS: deployed
 REVISION: 1
-NOTES:
-DataSphere deployed. Get the UI URL with:
-  oc get route datasphere-ui -o jsonpath='{.spec.host}'
 ----
 ====
 
@@ -304,7 +293,7 @@ deployment "datasphere-api" successfully rolled out
 ====
 
 Switch back to the *Console* tab in the Showroom interface.
-In the web console, switch to the `{user}-datasphere-helm` Project and open the Topology view.
+In the web console, switch to the `{user}-lab-helm` Project and open the Topology view.
 
 //TODO: add screenshot of Topology for the Helm-deployed project
 
