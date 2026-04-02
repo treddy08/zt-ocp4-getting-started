@@ -126,7 +126,7 @@ oc new-app python~{gitea_url}/{user}/datasphere-api --name=datasphere-api
 .Expected output
 ====
 ----
---> Found image ... (Python 3.11 on UBI 9)
+--> Found image ... (Python 3.12 on UBI 9)
     ...
 --> Creating resources ...
     imagestream.image.openshift.io "python" created
@@ -220,7 +220,7 @@ Switch to your pre-provisioned Helm Project and install the DataSphere chart:
 
 [source,role="execute",subs="attributes+"]
 ----
-oc project {user}-lab-helm && helm install datasphere {datasphere_helm_chart} --version {datasphere_helm_version}
+oc project {user}-lab-helm && helm install datasphere {gitea_url}/api/packages/gitea-admin/helm/datasphere-{datasphere_helm_version}.tgz
 ----
 
 The first argument after `helm install` is the *release name* (`datasphere`). Helm uses it to
@@ -228,7 +228,8 @@ track this installation. The second argument is the chart location. `--version` 
 version so you always get exactly what you tested.
 
 NOTE: The same chart is also available in the OpenShift *Developer Catalog* — the console version
-of this lab walks through the UI flow. From the CLI, `helm` talks to the OCI registry directly.
+of this lab walks through the UI flow. The URL above points at the Gitea instance in your lab
+environment, which hosts the chart alongside your source code repositories.
 
 [%collapsible]
 .Expected output
@@ -278,7 +279,7 @@ map color palette. Try it without redeploying anything:
 
 [source,role="execute"]
 ----
-helm upgrade datasphere {datasphere_helm_chart} --version {datasphere_helm_version} --set theme=mars
+helm upgrade datasphere {gitea_url}/api/packages/gitea-admin/helm/datasphere-{datasphere_helm_version}.tgz --set theme=mars
 ----
 
 Helm re-renders only the resources that changed, applies them, and rolls the affected pod.
@@ -287,7 +288,7 @@ just as easily:
 
 [source,role="execute"]
 ----
-helm upgrade datasphere {datasphere_helm_chart} --version {datasphere_helm_version}
+helm upgrade datasphere {gitea_url}/api/packages/gitea-admin/helm/datasphere-{datasphere_helm_version}.tgz
 ----
 
 NOTE: To remove the entire application and every resource it created: `helm uninstall datasphere`

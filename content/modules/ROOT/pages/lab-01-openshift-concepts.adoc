@@ -121,6 +121,10 @@ NAME                             READY   UP-TO-DATE   AVAILABLE   AGE
 deployment.apps/datasphere-api   1/1     1            1           5m
 deployment.apps/datasphere-ui    1/1     1            1           5m
 
+NAME                                        DESIRED   CURRENT   READY   AGE
+replicaset.apps/datasphere-api-7d6f9b8c4   1         1         1       5m
+replicaset.apps/datasphere-ui-5c8b4f6d9    1         1         1       5m
+
 NAME                                   HOST/PORT
 route.route.openshift.io/datasphere-ui datasphere-ui-{user}-datasphere.apps.{cluster_subdomain}
 ----
@@ -176,7 +180,7 @@ Inspect the frontend pod in detail:
 
 [source,role="execute"]
 ----
-oc describe pod -l app=datasphere-ui
+oc describe pod -l component=ui
 ----
 
 [%collapsible]
@@ -188,7 +192,7 @@ Namespace:    {user}-datasphere
 Labels:       app=datasphere-ui
 Containers:
   datasphere-ui:
-    Image:    quay.io/rhpds/datasphere-ui:1.1.0
+    Image:    quay.io/rhpds/datasphere-ui:1.1.2
     Port:     8080/TCP
     State:    Running
     Ready:    True
@@ -201,7 +205,7 @@ Check the application logs:
 
 [source,role="execute"]
 ----
-oc logs -l app=datasphere-ui
+oc logs -l component=ui
 ----
 
 [%collapsible]
@@ -245,14 +249,14 @@ oc describe service datasphere-ui
 ====
 ----
 Name:              datasphere-ui
-Selector:          app=datasphere-ui
+Selector:          app=datasphere,component=ui
 Type:              ClusterIP
 Port:              8080/TCP
 Endpoints:         10.x.x.x:8080
 ----
 ====
 
-Notice the `Selector` field: it uses a label (`app=datasphere-ui`) to identify which pods to
+Notice the `Selector` field: it uses labels (`app=datasphere,component=ui`) to identify which pods to
 route traffic to. This label-based selection is how OpenShift connects resources together.
 
 === The Route: external access
