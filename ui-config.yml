@@ -1,8 +1,8 @@
 ---
 type: showroom
 
-# Set the left column width to 30%
-default_width: 30
+# Set the left column width to 40%
+default_width: 40
 # Persist the URL state so browser refresh doesn't reset the UI
 persist_url_state: true
 
@@ -11,11 +11,11 @@ view_switcher:
   default_mode: split
 
 tabs:
-  - name: Terminal
-    path: /wetty
-    port: 443
-  - name: OCP Console
+  - name: OpenShift Console
     url: 'https://console-openshift-console.${DOMAIN}'
+  - name: Terminal
+    path: /terminal
+    port: 443
   - name: Client App
     url: 'https://datasphere-ui-${USER}-datasphere.${DOMAIN}'
   - name: Gitea

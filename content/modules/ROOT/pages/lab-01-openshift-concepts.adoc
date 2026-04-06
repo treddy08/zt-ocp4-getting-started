@@ -201,7 +201,7 @@ Namespace:    {user}-datasphere
 Labels:       app=datasphere
 Containers:
   datasphere-ui:
-    Image:    quay.io/rhpds/datasphere-ui:1.1.3
+    Image:    {datasphere_ui_image}
     Port:     8080/TCP
     State:    Running
     Ready:    True
