@@ -207,6 +207,23 @@ datasphere-ui-7c9d8e6f4-tv4j6   1/1     Running   0          12s
 ----
 ====
 
+Wait until all 3 pods show `1/1 Running` before continuing:
+
+[source,role="execute",subs="attributes+"]
+----
+oc wait --for=condition=ready pod --selector component=ui --timeout=60s
+----
+
+[%collapsible]
+.Expected output
+====
+----
+pod/datasphere-ui-7c9d8e6f4-pq8x2 condition met
+pod/datasphere-ui-7c9d8e6f4-rs1k9 condition met
+pod/datasphere-ui-7c9d8e6f4-tv4j6 condition met
+----
+====
+
 Now pick 1 pod and delete it:
 
 [source,role="execute",subs="attributes+"]
@@ -516,36 +533,35 @@ never do this. You'd ship with all of these enabled from day one. We're strippin
 them so you can add each one yourself and understand what each piece does.
 ====
 
-Wait for the pods to start:
+Watch everything come up — Helm created 3 deployments and they all need to be ready before
+you open the app. Wait until all pods show `1/1 Running`, then press `Ctrl+C` to continue:
 
 [source,role="execute"]
 ----
-oc rollout status deployment datasphere-api
+watch oc get all
 ----
 
 [%collapsible]
-.Expected output
+.Expected output (when ready)
 ====
 ----
-deployment "datasphere-api" successfully rolled out
-----
-====
+NAME                                    READY   STATUS    RESTARTS   AGE
+pod/datasphere-api-6b8c9d7f5-x4k2m     1/1     Running   0          30s
+pod/datasphere-ui-7c9d8e6f4-m3n7p      1/1     Running   0          30s
+pod/datasphere-redis-69c8864976-v668h   1/1     Running   0          30s
 
-Verify all components are running:
+NAME                     TYPE        CLUSTER-IP        EXTERNAL-IP   PORT(S)    AGE
+service/datasphere-api   ClusterIP   172.30.45.123     <none>        8080/TCP   30s
+service/datasphere-ui    ClusterIP   172.30.78.200     <none>        8080/TCP   30s
+service/redis            ClusterIP   172.30.12.99      <none>        6379/TCP   30s
 
-[source,role="execute"]
-----
-oc get pods
-----
+NAME                               READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/datasphere-api     1/1     1            1           30s
+deployment.apps/datasphere-ui      1/1     1            1           30s
+deployment.apps/datasphere-redis   1/1     1            1           30s
 
-[%collapsible]
-.Expected output
-====
-----
-NAME                              READY   STATUS    RESTARTS   AGE
-datasphere-api-6b8c9d7f5-x4k2m   1/1     Running   0          30s
-datasphere-ui-7c9d8e6f4-m3n7p    1/1     Running   0          30s
-redis-5f8a7b9c6-q2w4r            1/1     Running   0          30s
+NAME                                     HOST/PORT
+route.route.openshift.io/datasphere-ui   datasphere-ui-{user}-lab.{openshift_cluster_ingress_domain}
 ----
 ====
 
