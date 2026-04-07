@@ -6,4 +6,5 @@
 * xref:lab-01-openshift-concepts-collapsible.adoc[Module 1: Your First Application (Collapsible)]
 * xref:lab-02-deploy-datasphere.adoc[Module 2: Expanding and Automating (CLI)]
 * xref:lab-02-deploy-datasphere-console.adoc[Module 2: Expanding and Automating (Console)]
-* xref:lab-03-apps-never-down.adoc[Module 3: Apps That Never Go Down]
+* xref:lab-03-apps-never-down.adoc[Module 3: Apps That Never Go Down (CLI)]
+* xref:lab-03-apps-never-down-console.adoc[Module 3: Apps That Never Go Down (Console)]
