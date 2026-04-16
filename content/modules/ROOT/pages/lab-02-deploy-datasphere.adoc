@@ -207,7 +207,7 @@ deployment "datasphere-api" successfully rolled out
 
 === Step 2.3: Watch the map come to life
 
-Open the UI URL — the same URL from before:
+Get your application URL:
 
 [source,role="execute"]
 ----
@@ -224,7 +224,8 @@ datasphere-ui   datasphere-ui-{user}-lab.{openshift_cluster_ingress_domain}     
 ----
 ====
 
-The map is now populated with datacenter sites. You didn't reconfigure the UI. You didn't update
+Open the URL from the `HOST` column. This time the map is populated with datacenter sites —
+instead of the empty map from before, you're seeing live data from the API you just deployed. You didn't reconfigure the UI. You didn't update
 any hostnames or IP addresses. The moment `datasphere-api` came online as a Service in this
 Project, the UI found it automatically.
 
