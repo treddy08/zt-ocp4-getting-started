@@ -1,0 +1,219 @@
+= Lab 4: Git Is Your Source of Truth
+:navtitle: Lab 4: GitOps
+
+== What you will do
+
+You have been deploying and operating DataSphere by running commands.
+Those commands work, but they leave no record of what changed, when, or why.
+If something breaks at 2am, can you tell what state the cluster was in yesterday?
+
+GitOps answers that question by making your Git repository the source of truth for your
+cluster. You declare what you want in Git; a controller called ArgoCD watches that
+repository and keeps the cluster in sync. Every change is a commit. Every rollback is a
+revert. The audit trail is the commit history.
+
+In this lab you will:
+
+* Open your personal ArgoCD instance
+* Register your DataSphere application under GitOps management
+* Watch ArgoCD reconcile the running app to match what is declared in Git
+* Add a new major datacenter hub by editing a config file in Git
+* Watch ArgoCD automatically detect and apply the change
+
+== Section 1: Your ArgoCD Instance
+
+Your environment was provisioned with a personal ArgoCD instance.
+Open it now using the URL from your connection details.
+
+[source,role="copypaste"]
+----
+{argocd_url}
+----
+
+Click *Log in via OpenShift* and use your existing OpenShift credentials.
+
+The dashboard is empty — no applications are registered yet.
+That is about to change.
+
+image::lab-04-01-argocd-empty.png[ArgoCD dashboard with no applications]
+
+== Section 2: Register DataSphere Under GitOps
+
+Rather than deploying a brand new application, you are going to register your existing
+DataSphere configuration under GitOps management. The Helm chart that describes your
+DataSphere stack lives in your Gitea repository — ArgoCD just needs to know where to
+find it.
+
+=== Create the Application
+
+Click *+ New App* in the top left.
+
+Fill in the form:
+
+[cols="1,2"]
+|===
+| Field | Value
+
+| *Application Name*
+| `datasphere`
+
+| *Project Name*
+| `lab`
+
+| *Sync Policy*
+| Automatic
+
+| *Repository URL*
+| `\https://gitea.{openshift_cluster_ingress_domain}/{user}/datasphere`
+
+| *Revision*
+| `main`
+
+| *Path*
+| `.`
+
+| *Cluster URL*
+| `\https://kubernetes.default.svc`
+
+| *Namespace*
+| `{user}-gitops-lab`
+|===
+
+Leave all other fields at their defaults. Click *Create*.
+
+image::lab-04-02-argocd-new-app.png[ArgoCD new application form filled out]
+
+=== Watch ArgoCD sync
+
+ArgoCD immediately fetches your repository and compares what is declared there against
+what is running in `{user}-gitops-lab` — which is currently empty.
+It applies everything from the chart: Deployments, Services, ConfigMaps, the Route, the HPA.
+
+image::lab-04-03-argocd-syncing.png[ArgoCD showing the datasphere application syncing]
+
+Within a minute the status shows *Synced* and *Healthy*.
+
+image::lab-04-04-argocd-synced.png[ArgoCD showing the datasphere application synced and healthy]
+
+Click the *datasphere* application tile. The graph shows every resource ArgoCD is
+managing — your entire DataSphere stack, declared in Git and reconciled here automatically.
+
+Open the DataSphere app to confirm it is running:
+
+[source,role="copypaste"]
+----
+{datasphere_gitops_url}
+----
+
+=== What just happened
+
+ArgoCD fetched your `datasphere` Gitea repository, rendered the Helm chart, and applied
+the resulting manifests. It now polls that repository continuously and keeps the cluster
+in sync. If someone manually changes a resource in the cluster, ArgoCD will detect the
+drift on its next check cycle.
+
+[NOTE]
+====
+This lab uses *automatic sync*, which means ArgoCD applies changes from Git without
+waiting for approval. Teams that want an explicit review step before changes are applied
+use *manual sync* instead — ArgoCD shows the drift but waits for a human to click Sync.
+You can switch between modes in *App Details → Sync Policy*.
+====
+
+== Section 3: Change Git, Change the Cluster
+
+The DataSphere network has six major hubs across the Americas, Europe, and Asia Pacific.
+The Middle East and Africa region has only regional edge sites — no major hub.
+The edge sites in Dubai and Johannesburg route all the way to European hubs.
+
+You are going to add a new major hub in Nairobi by editing one file in Git.
+ArgoCD will do the rest.
+
+=== Edit values.yaml in Gitea
+
+Open your `datasphere` repository in Gitea:
+
+[source,role="copypaste"]
+----
+https://gitea.{openshift_cluster_ingress_domain}/{user}/datasphere
+----
+
+Click `values.yaml`, then the pencil icon to edit.
+
+Find the `extraDatacenters: []` line in the `api:` section and replace it with:
+
+[source,yaml,role="copypaste"]
+----
+  extraDatacenters:
+    - id: "rh-mea"
+      display_name: "MEA Hub"
+      city: "Nairobi"
+      region: "Middle East & Africa"
+      tier: "major"
+      lat: -1.3
+      lng: 36.8
+      base_capacity_pct: 45
+      base_workload_count: 892
+----
+
+Scroll down and commit with a clear message:
+
+[source,role="copypaste"]
+----
+Add MEA Hub (Nairobi) — bring Middle East & Africa region online
+----
+
+=== Watch ArgoCD sync
+
+Switch back to ArgoCD. Within 3 minutes the application moves to *OutOfSync* as ArgoCD
+detects that `values.yaml` changed. Auto-sync then fires and you will see it move through
+*Syncing* back to *Synced*.
+
+The ConfigMap change triggers a rolling restart of the API pod — ArgoCD handles this
+automatically as part of the sync.
+
+=== Verify on the DataSphere map
+
+Reload the DataSphere app. A new hub dot appears in East Africa. Backbone arcs connect
+Nairobi to all other major hubs globally. The Dubai and Johannesburg edge sites now route
+to this closer hub instead of all the way to Europe.
+
+You made one commit. ArgoCD handled the rest.
+
+=== Review the sync history
+
+In ArgoCD click *App Details → History and Rollback*. Two entries: the initial sync and
+your MEA Hub commit. To roll back, click the three-dot menu on any entry and select
+*Rollback* — ArgoCD reverts the cluster to that exact state.
+
+== What you learned
+
+* *Git is the source of truth* — cluster state is declared in a repository, not in your
+  command history
+* *ArgoCD watches continuously* — drift between Git and the cluster is detected
+  automatically
+* *Changes are commits* — every modification has an author, a timestamp, and a message;
+  rolling back is a Git operation
+* *The cluster reconciles itself* — no `oc apply` needed; ArgoCD handles the sync
+
+== Summary
+
+[cols="1,2"]
+|===
+| What you did | How it worked
+
+| Opened ArgoCD
+| A personal instance managing only your GitOps lab namespace
+
+| Registered DataSphere
+| Pointed ArgoCD at your Gitea repo — it synced the running app immediately
+
+| Edited `values.yaml` in Gitea
+| One commit, no `oc` commands
+
+| Watched auto-sync apply the change
+| ConfigMap updated → API restarted → new datacenter live
+
+| Reviewed sync history
+| Every sync is recorded and reversible
+|===
