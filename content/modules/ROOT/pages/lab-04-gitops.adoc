@@ -1,5 +1,5 @@
-= Lab 4: Git Is Your Source of Truth
-:navtitle: Lab 4: GitOps
+= Module 4: Git Is Your Source of Truth
+:navtitle: Module 4: GitOps
 
 == What you will do
 

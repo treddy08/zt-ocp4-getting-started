@@ -12,4 +12,4 @@
 * xref:lab-03-apps-never-down-console.adoc[Module 3: Apps That Never Go Down (Console)]
 * xref:lab-03-apps-never-down-combined.adoc[Module 3: Apps That Never Go Down (Combined)]
 * xref:lab-03-apps-never-down-collapsible.adoc[Module 3: Apps That Never Go Down (Collapsible)]
-* xref:lab-04-gitops.adoc[Module 4: Git Is Your Source of Truth]
+* xref:lab-04-gitops.adoc[Module 4: Git Is Your Source of Truth (GitOps)]

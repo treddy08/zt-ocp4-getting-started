@@ -7,5 +7,14 @@ Each lab is hands-on and self-contained: you'll work directly on a live OpenShif
 
 == Labs in this series
 
-* xref:lab-01-openshift-concepts.adoc[Module 1: OpenShift Concepts -- Your First Pod] +
+* xref:lab-01-openshift-concepts.adoc[Module 1: Your First Application] +
   Deploy a containerized application and learn the core building blocks: Pods, Services, and Routes.
+
+* xref:lab-02-deploy-datasphere.adoc[Module 2: Expanding and Automating Your Application Deployment] +
+  Deploy a two-tier application three ways — from a container image, via Source-to-Image, and with Helm.
+
+* xref:lab-03-apps-never-down.adoc[Module 3: Apps That Never Go Down] +
+  Configure health probes, scale to multiple replicas, and set up autoscaling to handle real traffic.
+
+* xref:lab-04-gitops.adoc[Module 4: Git Is Your Source of Truth] +
+  Register your application under GitOps management and watch ArgoCD keep the cluster in sync with Git.
