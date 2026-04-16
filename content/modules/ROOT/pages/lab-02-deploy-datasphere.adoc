@@ -272,12 +272,8 @@ helm install datasphere {gitea_url}/api/packages/gitea-admin/helm/datasphere-{da
 ----
 
 The first argument after `helm install` is the *release name* (`datasphere`). Helm uses it to
-track this installation. The second argument is the chart location. `--version` pins the chart
-version so you always get exactly what you tested.
-
-NOTE: The same chart is also available in the OpenShift *Developer Catalog* — the console version
-of this lab walks through the UI flow. The URL above points at the Gitea instance in your lab
-environment, which hosts the chart alongside your source code repositories.
+track this installation. The second argument is the chart URL — it points directly at the
+DataSphere chart package hosted in your lab's Gitea instance.
 
 [%collapsible]
 .Expected output

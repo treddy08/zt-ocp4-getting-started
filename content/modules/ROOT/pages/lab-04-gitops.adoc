@@ -64,7 +64,7 @@ Fill in the form:
 | Automatic
 
 | *Repository URL*
-| `\https://gitea.{openshift_cluster_ingress_domain}/{user}/datasphere`
+| `\https://gitea.{openshift_cluster_ingress_domain}/{user}/datasphere-gitops`
 
 | *Revision*
 | `main`
@@ -107,7 +107,7 @@ Open the DataSphere app to confirm it is running:
 
 === What just happened
 
-ArgoCD fetched your `datasphere` Gitea repository, rendered the Helm chart, and applied
+ArgoCD fetched your `datasphere-gitops` Gitea repository, rendered the Helm chart, and applied
 the resulting manifests. It now polls that repository continuously and keeps the cluster
 in sync. If someone manually changes a resource in the cluster, ArgoCD will detect the
 drift on its next check cycle.
@@ -131,11 +131,11 @@ ArgoCD will do the rest.
 
 === Edit values.yaml in Gitea
 
-Open your `datasphere` repository in Gitea:
+Open your `datasphere-gitops` repository in Gitea:
 
 [source,role="copypaste"]
 ----
-https://gitea.{openshift_cluster_ingress_domain}/{user}/datasphere
+https://gitea.{openshift_cluster_ingress_domain}/{user}/datasphere-gitops
 ----
 
 Click `values.yaml`, then the pencil icon to edit.
