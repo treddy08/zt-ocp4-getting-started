@@ -9,7 +9,7 @@ start_page: ROOT:index.adoc
 asciidoc:
   attributes:
     lab_name: OpenShift Getting Started
-    datasphere_ui_image: quay.io/rhpds/datasphere-ui:1.4.4
+    datasphere_ui_image: quay.io/rhpds/datasphere-ui:1.4.5
     datasphere_api_image: quay.io/rhpds/datasphere-api:1.4.4
     datasphere_helm_version: 1.5.0
     # gitea_url is overridden at runtime from provision data — placeholder shown below
