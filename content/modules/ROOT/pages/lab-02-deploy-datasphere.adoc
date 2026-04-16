@@ -140,7 +140,7 @@ with no Dockerfile required.
 
 [source,role="execute",subs="attributes+"]
 ----
-oc new-app python~{gitea_url}/{user}/datasphere-api --name=datasphere-api
+oc new-app python:3.12-ubi9~{gitea_url}/{user}/datasphere-api --name=datasphere-api
 ----
 
 [%collapsible]
