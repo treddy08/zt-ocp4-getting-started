@@ -364,9 +364,17 @@ flowchart LR
 <script>
 document.getElementById('arch-diagram').addEventListener('click', function() {
   var svg = this.querySelector('svg');
-  if (svg) {
-    var data = new XMLSerializer().serializeToString(svg);
-    window.open('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(data), '_blank');
+  if (!svg) return;
+  var svgData = new XMLSerializer().serializeToString(svg);
+  var newWin = window.open('', '_blank');
+  if (newWin) {
+    newWin.document.write(
+      '<!DOCTYPE html><html><head><style>' +
+      'body{margin:0;padding:16px;display:flex;justify-content:center;align-items:flex-start;background:#fff}' +
+      'svg{max-width:100%;height:auto}' +
+      '</style></head><body>' + svgData + '</body></html>'
+    );
+    newWin.document.close();
   }
 });
 </script>
