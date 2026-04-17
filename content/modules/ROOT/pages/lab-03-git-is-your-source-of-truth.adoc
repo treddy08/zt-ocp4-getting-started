@@ -295,8 +295,11 @@ the Lab 1 deployment is unaffected unless you repackage and republish the chart.
 
 === Step 3.2: Edit values.yaml
 
-Click `values.yaml` in the file list, then click the *pencil icon* (Edit this file)
-in the top-right corner of the file view.
+Click `values.yaml` in the file list.
+
+image::lab-03-09-gitea-values-yaml-edit.png[Gitea file view showing values.yaml with the pencil edit icon in the top-right corner]
+
+Click the *pencil icon* (Edit this file) in the top-right corner of the file view.
 
 Find the `extraDatacenters: []` line in the `api:` section.
 
