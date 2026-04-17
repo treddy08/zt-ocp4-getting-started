@@ -448,7 +448,8 @@ The status shows *OutOfSync*: the cluster has 0 API replicas, but
 cluster has -- and those don't match.
 
 Because *Self Heal* is enabled, ArgoCD restores the API to 1 replica automatically
-within the next sync cycle. Optionally, watch from the CLI as the pod comes back:
+within the next sync cycle. Optionally, watch it come back using either the CLI
+or the web console:
 
 [%collapsible]
 .Using the Terminal (CLI)
@@ -468,6 +469,15 @@ datasphere-redis-69c8864976-xxxxx   1/1     Running   0          15m
 datasphere-ui-597f67c7bc-xxxxx      1/1     Running   0          15m
 ----
 =====
+====
+
+[%collapsible]
+.Using the Web Console
+====
+In the console, switch to the *{user}-gitops-lab* project and click
+*Workloads* → *Pods*. Watch the `datasphere-api` pod return to *Running* status.
+
+image::lab-03-12-console-api-pod-restored.png[Pods list showing datasphere-api back in Running status after ArgoCD Self Heal restored it]
 ====
 
 The API pod is back. You didn't touch it -- ArgoCD matched the cluster to Git.
