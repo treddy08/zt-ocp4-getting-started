@@ -286,8 +286,12 @@ Log in with your lab credentials if prompted:
 * *Password*: `{password}`
 
 You'll see the `datasphere-gitops` repository: the Helm chart that ArgoCD used to
-deploy DataSphere. This is the same chart you ran `helm install` from in Lab 1 --
-now it's the Git source of truth for a live deployment.
+deploy DataSphere. This is the same chart source you used in Lab 1 -- but with one
+important difference. In Lab 1, `helm install` pulled a packaged snapshot from the
+Gitea package registry: a frozen `.tgz` file. That release is still running in
+`{user}-lab`, unchanged. ArgoCD, by contrast, watches this Git repository directly.
+Edits you make here are picked up on the next sync and applied to `{user}-gitops-lab` --
+the Lab 1 deployment is unaffected unless you repackage and republish the chart.
 
 === Step 3.2: Edit values.yaml
 
