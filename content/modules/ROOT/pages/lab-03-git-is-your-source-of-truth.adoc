@@ -253,29 +253,6 @@ Back in the *ArgoCD* tab, click on the *datasphere-ui* Route resource in the res
 A detail panel opens on the right. Click the *external link* icon next to the hostname
 to open DataSphere in a new browser tab.
 
-Alternatively:
-
-[%collapsible]
-.Using the Terminal (CLI)
-====
-[source,role="execute",subs="attributes+"]
-----
-oc get route datasphere-ui -n {user}-gitops-lab
-----
-
-[%collapsible]
-.Expected output
-=====
-[subs="attributes+"]
-----
-NAME            HOST/PORT                                                              PATH   SERVICES        PORT   TERMINATION   WILDCARD
-datasphere-ui   datasphere-ui-{user}-gitops-lab.{openshift_cluster_ingress_domain}          datasphere-ui   8080   edge          None
-----
-=====
-
-Copy the URL from the `HOST/PORT` column and open it in your browser.
-====
-
 You'll see the DataSphere demo app running in `{user}-gitops-lab` -- the same app,
 a second independent deployment, this time managed entirely by ArgoCD.
 
