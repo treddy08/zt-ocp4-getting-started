@@ -797,7 +797,7 @@ You saw this in action in Section 1: now you're configuring it yourself.
 
 [source,role="execute"]
 ----
-oc autoscale deployment/datasphere-api --min=2 --max=5 --cpu-percent=50
+oc autoscale deployment/datasphere-api --min=2 --max=5 --cpu=50%
 ----
 
 .Expected output
@@ -861,7 +861,7 @@ measure CPU utilization without them.
 
 A few settings worth knowing about the HPA you just created:
 
-* **`--cpu-percent` threshold**: We set 50%. You could set 70% for apps that handle load
+* **`--cpu` threshold**: We set 50%. You could set 70% for apps that handle load
   spikes well, or 30% for latency-sensitive services that need headroom before scaling
   kicks in.
 

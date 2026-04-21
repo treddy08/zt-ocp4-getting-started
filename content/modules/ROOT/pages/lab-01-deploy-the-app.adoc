@@ -66,7 +66,6 @@ You have access to the following projects and can switch between them with 'oc p
 
   * {user}-datasphere
     {user}-gitops
-    {user}-gitops-lab
     {user}-lab
     {user}-lab-helm
 
@@ -98,7 +97,7 @@ Several projects have been provisioned for you. The ones you'll use in this lab:
 * `{user}-datasphere`: contains the pre-deployed DataSphere demo app -- explore it in Section 1
 * `{user}-lab`: your clean workspace -- you'll build here in Section 2 and Section 3
 
-You'll also see `{user}-gitops`, `{user}-gitops-lab`, and `{user}-lab-helm` -- those are used in later labs.
+You'll also see `{user}-gitops` and `{user}-lab-helm` -- those are used in later labs.
 
 NOTE: In OpenShift, a Project is equivalent to a Kubernetes namespace. It scopes your resources and controls access.
 

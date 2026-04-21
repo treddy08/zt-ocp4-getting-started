@@ -633,7 +633,7 @@ You saw this in action in Section 1 — now you're configuring it yourself.
 
 [source,role="execute"]
 ----
-oc autoscale deployment/datasphere-api --min=2 --max=5 --cpu-percent=50
+oc autoscale deployment/datasphere-api --min=2 --max=5 --cpu=50%
 ----
 
 [%collapsible]
