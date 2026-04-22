@@ -1,4 +1,13 @@
 * xref:index.adoc[Home]
+
+ifeval::["{lab_number}" == "1"]
 * xref:lab-01-deploy-the-app-collapsible.adoc[Lab 1: Deploy the App]
+endif::[]
+
+ifeval::["{lab_number}" == "2"]
 * xref:lab-02-apps-never-down-collapsible.adoc[Lab 2: Apps That Never Go Down]
+endif::[]
+
+ifeval::["{lab_number}" == "3"]
 * xref:lab-03-git-is-your-source-of-truth.adoc[Lab 3: Git Is Your Source of Truth]
+endif::[]

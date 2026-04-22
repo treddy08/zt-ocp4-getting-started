@@ -9,6 +9,7 @@ start_page: ROOT:index.adoc
 asciidoc:
   attributes:
     lab_name: OpenShift Getting Started
+    lab_number: '{lab_number}'
     datasphere_ui_image: quay.io/rhpds/datasphere-ui:1.4.5
     datasphere_api_image: quay.io/rhpds/datasphere-api:1.4.5
     datasphere_helm_version: 1.5.1
